@@ -1,4 +1,4 @@
-Nama : Angga Restha Rustyanto
+Namaku : Angga Restha Rustyanto
 
 NPM : 2506656444
 
