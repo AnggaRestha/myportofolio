@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <header class="site-header">
@@ -15,11 +16,14 @@
             <a href="#profile" class="brand">Restha</a>
             <nav>
                 <a href="#profile">Profile</a>
+                <a href="#projects">Projects</a>
+                <a href="#awards">Awards & Certifications</a>
             </nav>
         </div>
     </header>
 
     <main>
+        <!-- Section Profile / Hero -->
         <section class="hero" id="profile">
             <div class="container hero-grid">
                 <div class="hero-identity">
@@ -28,7 +32,7 @@
                 </div>
                 <div class="hero-photo">
                     <div class="photo-block"></div>
-                    <img class="avatar" src="/static/img/KingRestha.jpg" alt="Photo of Restha">
+                    <img class="avatar" src="{% static 'img/KingRestha.jpg' %}" alt="Photo of Restha">
                 </div>
                 <div class="hero-details">
                     <p class="bio">CS student at Universitas Indonesia for longer than planned, now a familiar (and slightly dreaded) face among Fasilkom students as a teaching assistant across several courses.</p>
@@ -46,6 +50,114 @@
                         <a href="http://github.com/AnggaRestha" class="social-link">GitHub</a>
                         <a href="https://www.linkedin.com/in/anggarestha/" class="social-link">LinkedIn</a>
                         <a href="https://www.instagram.com/whosrestha/" class="social-link">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Projects -->
+        <section class="projects" id="projects">
+            <div class="container">
+                <h2 class="section-title">Featured Projects</h2>
+                <div class="projects-grid">
+                    <article class="project-card">
+                        <span class="project-tag">Python &amp; Sockets</span>
+                        <h3>Multiplayer Card Game</h3>
+                        <p>Client-server multiplayer card game built with Python Pygame and socket architecture, featuring real-time state sync and custom economies.</p>
+                    </article>
+
+                    <article class="project-card">
+                        <span class="project-tag">Logisim &amp; Assembly</span>
+                        <h3>Custom Datapath &amp; Processor</h3>
+                        <p>Digital logic circuit design and datapath implementation for microarchitectural simulation using Logisim and AVR/MIPS Assembly.</p>
+                    </article>
+
+                    <article class="project-card">
+                        <span class="project-tag">Community Project</span>
+                        <h3>V-CODE Literacy Platform</h3>
+                        <p>A digital literacy community framework targeting local neighborhoods to enhance foundational software skills and access.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Awards & Certification (Layout Box Redesign) -->
+        <section class="awards" id="awards">
+            <div class="container">
+                <h2 class="section-title">Awards &amp; Certifications</h2>
+                
+                <!-- Group 1: Competition Cards (Neubrutalism Boxes) -->
+                <div class="awards-wrapper">
+                    <h3 class="group-title">🏆 Competition &amp; Events</h3>
+                    <div class="awards-grid">
+                        <div class="award-box">
+                            <div class="award-badge-row">
+                                <span class="badge gold">Top 3</span>
+                                <span class="location">DKI Jakarta</span>
+                            </div>
+                            <h3>3<sup>rd</sup> Place, JakBee Business Plan</h3>
+                            <p>Regional business competition focused on practical innovation.</p>
+                        </div>
+
+                        <div class="award-box">
+                            <div class="award-badge-row">
+                                <span class="badge silver">Top 3</span>
+                                <span class="location">DKI Jakarta</span>
+                            </div>
+                            <h3>3<sup>rd</sup> LKS Internal IT Network System Administrator</h3>
+                            <p>Competitive IT infrastructure & system administration showcase.</p>
+                        </div>
+
+                        <div class="award-box">
+                            <div class="award-badge-row">
+                                <span class="badge orange">Event</span>
+                                <span class="location">Jakarta</span>
+                            </div>
+                            <h3>Visitor National CyberSecurity Connect 2025</h3>
+                            <p>Participated in national cybersecurity conference at Hotel Bidakara.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group 2: Professional Certifications (Border Accent Boxes) -->
+                <div class="awards-wrapper">
+                    <h3 class="group-title">📜 Professional Certifications</h3>
+                    <div class="cert-grid">
+                        <div class="cert-box">
+                            <div class="cert-header">
+                                <span class="cert-tag">TP-Link Omada</span>
+                                <span class="cert-status-dot"></span>
+                            </div>
+                            <h4>Omada Certified Network Administrator (OCNA) Wireless</h4>
+                            <p class="cert-desc">Enterprise Wireless Network Infrastructure</p>
+                        </div>
+
+                        <div class="cert-box">
+                            <div class="cert-header">
+                                <span class="cert-tag">Fortinet</span>
+                                <span class="cert-status-dot"></span>
+                            </div>
+                            <h4>Fortinet Certified Associate in CyberSecurity</h4>
+                            <p class="cert-desc">Network Defense &amp; Cybersecurity Fundamentals</p>
+                        </div>
+
+                        <div class="cert-box">
+                            <div class="cert-header">
+                                <span class="cert-tag">Ruijie Networks</span>
+                                <span class="cert-status-dot"></span>
+                            </div>
+                            <h4>Ruijie Certified Network Associate (RCNA) WLAN</h4>
+                            <p class="cert-desc">Wireless LAN Architecture &amp; Deployment</p>
+                        </div>
+
+                        <div class="cert-box">
+                            <div class="cert-header">
+                                <span class="cert-tag">Ruijie Networks</span>
+                                <span class="cert-status-dot"></span>
+                            </div>
+                            <h4>Ruijie Certified Network Associate (RCNA) Routing &amp; Switching</h4>
+                            <p class="cert-desc">Enterprise Routing &amp; Switching Systems</p>
+                        </div>
                     </div>
                 </div>
             </div>
