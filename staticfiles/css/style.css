@@ -31,9 +31,6 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     padding: 0 1.5rem;
 }
 
-/* ==========================================
-   Header Section
-   ========================================== */
 .site-header {
     border-bottom: 1px solid var(--line);
 }
@@ -69,9 +66,6 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     color: var(--accent);
 }
 
-/* ==========================================
-   Hero Section
-   ========================================== */
 .hero {
     padding: 4.5rem 0 5rem;
 }
@@ -181,9 +175,6 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     border: 3px solid var(--ink);
 }
 
-/* ==========================================
-   Projects Section
-   ========================================== */
 .projects {
     padding: 4rem 0 5rem;
     border-top: 1px solid var(--line);
@@ -236,9 +227,6 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     line-height: 1.5;
 }
 
-/* ==========================================
-   Awards & Certifications (Box & Border Layout)
-   ========================================== */
 .awards {
     padding: 4rem 0 5rem;
     border-top: 1px solid var(--line);
@@ -333,7 +321,6 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     line-height: 1.45;
 }
 
-/* --- Certification Boxes (Border Left Highlight Grid) --- */
 .cert-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
