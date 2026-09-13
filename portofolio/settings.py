@@ -135,3 +135,11 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# settings.py
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://angga-restha-myportofolio.pws.cs.ui.ac.id',
+    'http://127.0.0.1',
+    'http://localhost',
+]
