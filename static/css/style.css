@@ -5,20 +5,23 @@
 }
 
 :root {
-    --ink: #1c1917;
-    --paper: #faf6f0;
-    --accent: #d95d39;
-    --accent-dark: #a8442a;
-    --line: #e3d9c9;
-    --text-muted: #6b6459;
+    --ink: #f2ede3;
+    --paper: #15130f;
+    --surface: #1f1c16;
+    --accent: #f2764e;
+    --accent-dark: #ff9c72;
+    --line: #35301f;
+    --text-muted: #a39a89;
+    --shadow: #000000;
     --radius: 4px;
 }
 
 body {
-    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    background-color: var(--paper);
-    line-height: 1.6;
+    background-color: var(--paper) !important;
+    color: var(--ink) !important;
+    font-family: 'Space Grotesk', sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
 h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert-box h4 {
@@ -31,9 +34,6 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     padding: 0 1.5rem;
 }
 
-/* ==========================================
-   Header Section
-   ========================================== */
 .site-header {
     border-bottom: 1px solid var(--line);
 }
@@ -69,9 +69,6 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     color: var(--accent);
 }
 
-/* ==========================================
-   Hero Section
-   ========================================== */
 .hero {
     padding: 4.5rem 0 5rem;
 }
@@ -151,6 +148,7 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 
 .social-link:hover {
     background-color: var(--accent);
+    color: var(--paper);
 }
 
 .hero-photo {
@@ -181,9 +179,6 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     border: 3px solid var(--ink);
 }
 
-/* ==========================================
-   Projects Section
-   ========================================== */
 .projects {
     padding: 4rem 0 5rem;
     border-top: 1px solid var(--line);
@@ -202,11 +197,11 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 }
 
 .project-card {
-    background-color: #ffffff;
+    background-color: var(--surface);
     border: 2px solid var(--ink);
     border-radius: var(--radius);
     padding: 1.5rem;
-    box-shadow: 4px 4px 0px var(--ink);
+    box-shadow: 4px 4px 0px var(--shadow);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -228,6 +223,7 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 .project-card h3 {
     font-size: 1.25rem;
     margin-bottom: 0.5rem;
+    color: var(--ink);
 }
 
 .project-card p {
@@ -236,9 +232,6 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     line-height: 1.5;
 }
 
-/* ==========================================
-   Awards & Certifications (Box & Border Layout)
-   ========================================== */
 .awards {
     padding: 4rem 0 5rem;
     border-top: 1px solid var(--line);
@@ -266,11 +259,11 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 }
 
 .award-box {
-    background-color: #ffffff;
+    background-color: var(--surface);
     border: 2.5px solid var(--ink);
     border-radius: var(--radius);
     padding: 1.25rem;
-    box-shadow: 4px 4px 0px var(--ink);
+    box-shadow: 4px 4px 0px var(--shadow);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     flex-direction: column;
@@ -300,18 +293,18 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 }
 
 .badge.gold {
-    background-color: #fde047;
-    color: var(--ink);
+    background-color: #eab308;
+    color: #1a1400;
 }
 
 .badge.silver {
-    background-color: #e2e8f0;
-    color: var(--ink);
+    background-color: #94a3b8;
+    color: #131720;
 }
 
 .badge.orange {
-    background-color: #ffedd5;
-    color: var(--accent-dark);
+    background-color: #6b3a22;
+    color: #ffd7b8;
 }
 
 .location {
@@ -333,7 +326,6 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     line-height: 1.45;
 }
 
-/* --- Certification Boxes (Border Left Highlight Grid) --- */
 .cert-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -341,7 +333,7 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 }
 
 .cert-box {
-    background-color: #ffffff;
+    background-color: var(--surface);
     border: 2px solid var(--line);
     border-left: 5px solid var(--accent);
     border-radius: var(--radius);
@@ -374,7 +366,7 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 .cert-status-dot {
     width: 8px;
     height: 8px;
-    background-color: #22c55e;
+    background-color: #4ade80;
     border-radius: 50%;
     display: inline-block;
 }
@@ -423,4 +415,84 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     .social-links {
         justify-content: flex-start;
     }
+}
+
+.experience-section {
+    padding: 4rem 0;
+    border-top: 1px solid var(--line);
+}
+
+.section-kicker {
+    color: var(--accent-dark);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.experience-section h1 {
+    margin: 0.4rem 0 1.5rem;
+    font-size: 2rem;
+    color: var(--ink);
+}
+
+.experience-description,
+.empty-state {
+    color: var(--text-muted);
+}
+
+/* Container Grid */
+.experience-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Card Style Neubrutalism / Border Tebal */
+.experience-card {
+    background-color: var(--surface);
+    border: 2px solid var(--ink);
+    padding: 1.5rem;
+    box-shadow: 4px 4px 0px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.experience-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 7px 7px 0px var(--accent);
+}
+
+.experience-category {
+    color: var(--accent-dark);
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.experience-card h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--ink);
+}
+
+.experience-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.experience-status {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: auto;
 }

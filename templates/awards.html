@@ -12,9 +12,9 @@
 
     <style>
         body {
-            background-color: #faf8f5;
+            background-color: var(--paper);
             font-family: 'Space Grotesk', sans-serif;
-            color: #1a1a1a;
+            color: var(--ink);
         }
 
         .section-title {
@@ -22,6 +22,7 @@
             font-weight: 700;
             margin-top: 2.5rem;
             margin-bottom: 1.25rem;
+            color: var(--ink);
         }
 
         .awards-grid {
@@ -38,10 +39,10 @@
 
         /* CARD STYLE 1: Competition & Events */
         .comp-card {
-            background-color: #ffffff !important;
-            border: 2px solid #1a1a1a !important;
+            background-color: var(--surface) !important;
+            border: 2px solid var(--ink) !important;
             padding: 1.5rem !important;
-            box-shadow: 4px 4px 0px #1a1a1a !important;
+            box-shadow: 4px 4px 0px #000000 !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: space-between !important;
@@ -51,7 +52,7 @@
 
         .comp-card:hover {
             transform: translate(-3px, -3px) !important;
-            box-shadow: 7px 7px 0px #1a1a1a !important;
+            box-shadow: 7px 7px 0px var(--accent) !important;
         }
 
         .card-header-row {
@@ -62,17 +63,18 @@
         }
 
         .badge-pill {
-            border: 1px solid #1a1a1a;
+            border: 1px solid var(--ink);
             border-radius: 4px;
             padding: 2px 8px;
             font-size: 0.75rem;
             font-weight: 700;
-            background-color: #fff8dc;
+            background-color: #eab308;
+            color: #1a1400;
         }
 
         .location-text {
             font-size: 0.8rem;
-            color: #666;
+            color: var(--text-muted);
             font-weight: 500;
         }
 
@@ -81,22 +83,23 @@
             font-weight: 700;
             margin-bottom: 0.5rem;
             line-height: 1.3;
+            color: var(--ink);
         }
 
         .comp-card p {
             font-size: 0.85rem;
-            color: #555;
+            color: var(--text-muted);
             line-height: 1.4;
             margin: 0;
         }
 
         /* CARD STYLE 2: Professional Certifications */
         .cert-card {
-            background-color: #ffffff !important;
-            border: 1px solid #e0e0e0 !important;
-            border-left: 4px solid #d35400 !important;
+            background-color: var(--surface) !important;
+            border: 1px solid var(--line) !important;
+            border-left: 4px solid var(--accent) !important;
             padding: 1.25rem 1.5rem !important;
-            box-shadow: 0px 2px 4px rgba(0,0,0,0.04) !important;
+            box-shadow: 0px 2px 4px rgba(0,0,0,0.4) !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: space-between !important;
@@ -107,11 +110,11 @@
 
         .cert-card:hover {
             transform: translateY(-2px) !important;
-            box-shadow: 0px 6px 12px rgba(0,0,0,0.08) !important;
+            box-shadow: 0px 6px 12px rgba(0,0,0,0.5) !important;
         }
 
         .cert-category {
-            color: #c0392b;
+            color: var(--accent-dark);
             font-weight: 700;
             font-size: 0.75rem;
             text-transform: uppercase;
@@ -121,7 +124,7 @@
         .green-dot {
             width: 8px;
             height: 8px;
-            background-color: #2ecc71;
+            background-color: #4ade80;
             border-radius: 50%;
             display: inline-block;
         }
@@ -131,11 +134,12 @@
             font-weight: 700;
             margin: 0.5rem 0;
             line-height: 1.35;
+            color: var(--ink);
         }
 
         .cert-card p {
             font-size: 0.85rem;
-            color: #666;
+            color: var(--text-muted);
             margin: 0;
         }
     </style>
