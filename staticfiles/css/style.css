@@ -5,20 +5,23 @@
 }
 
 :root {
-    --ink: #1c1917;
-    --paper: #faf6f0;
-    --accent: #d95d39;
-    --accent-dark: #a8442a;
-    --line: #e3d9c9;
-    --text-muted: #6b6459;
+    --ink: #f2ede3;
+    --paper: #15130f;
+    --surface: #1f1c16;
+    --accent: #f2764e;
+    --accent-dark: #ff9c72;
+    --line: #35301f;
+    --text-muted: #a39a89;
+    --shadow: #000000;
     --radius: 4px;
 }
 
 body {
-    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    background-color: var(--paper);
-    line-height: 1.6;
+    background-color: var(--paper) !important;
+    color: var(--ink) !important;
+    font-family: 'Space Grotesk', sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
 h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert-box h4 {
@@ -145,6 +148,7 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 
 .social-link:hover {
     background-color: var(--accent);
+    color: var(--paper);
 }
 
 .hero-photo {
@@ -193,11 +197,11 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 }
 
 .project-card {
-    background-color: #ffffff;
+    background-color: var(--surface);
     border: 2px solid var(--ink);
     border-radius: var(--radius);
     padding: 1.5rem;
-    box-shadow: 4px 4px 0px var(--ink);
+    box-shadow: 4px 4px 0px var(--shadow);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -219,6 +223,7 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 .project-card h3 {
     font-size: 1.25rem;
     margin-bottom: 0.5rem;
+    color: var(--ink);
 }
 
 .project-card p {
@@ -254,11 +259,11 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 }
 
 .award-box {
-    background-color: #ffffff;
+    background-color: var(--surface);
     border: 2.5px solid var(--ink);
     border-radius: var(--radius);
     padding: 1.25rem;
-    box-shadow: 4px 4px 0px var(--ink);
+    box-shadow: 4px 4px 0px var(--shadow);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     flex-direction: column;
@@ -288,18 +293,18 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 }
 
 .badge.gold {
-    background-color: #fde047;
-    color: var(--ink);
+    background-color: #eab308;
+    color: #1a1400;
 }
 
 .badge.silver {
-    background-color: #e2e8f0;
-    color: var(--ink);
+    background-color: #94a3b8;
+    color: #131720;
 }
 
 .badge.orange {
-    background-color: #ffedd5;
-    color: var(--accent-dark);
+    background-color: #6b3a22;
+    color: #ffd7b8;
 }
 
 .location {
@@ -328,7 +333,7 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 }
 
 .cert-box {
-    background-color: #ffffff;
+    background-color: var(--surface);
     border: 2px solid var(--line);
     border-left: 5px solid var(--accent);
     border-radius: var(--radius);
@@ -361,7 +366,7 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 .cert-status-dot {
     width: 8px;
     height: 8px;
-    background-color: #22c55e;
+    background-color: #4ade80;
     border-radius: 50%;
     display: inline-block;
 }
@@ -428,42 +433,12 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 .experience-section h1 {
     margin: 0.4rem 0 1.5rem;
     font-size: 2rem;
-}
-
-.experience-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-}
-
-.experience-card {
-    padding: 1.25rem;
-    background-color: #fff;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-}
-
-.experience-category {
-    color: var(--accent-dark);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.experience-card h2 {
-    margin: 0.5rem 0;
-    font-size: 1.25rem;
+    color: var(--ink);
 }
 
 .experience-description,
 .empty-state {
     color: var(--text-muted);
-}
-
-.experience-status {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
 }
 
 /* Container Grid */
@@ -476,17 +451,23 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 
 /* Card Style Neubrutalism / Border Tebal */
 .experience-card {
-    background-color: #ffffff;
-    border: 2px solid #1a1a1a;
+    background-color: var(--surface);
+    border: 2px solid var(--ink);
     padding: 1.5rem;
-    box-shadow: 4px 4px 0px #1a1a1a;
+    box-shadow: 4px 4px 0px var(--shadow);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.experience-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 7px 7px 0px var(--accent);
 }
 
 .experience-category {
-    color: #c0392b;
+    color: var(--accent-dark);
     font-weight: 700;
     font-size: 0.85rem;
     text-transform: uppercase;
@@ -499,18 +480,19 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     font-size: 1.25rem;
     font-weight: 700;
     margin-bottom: 0.75rem;
-    color: #1a1a1a;
+    color: var(--ink);
 }
 
 .experience-description {
     font-size: 0.9rem;
-    color: #555555;
+    color: var(--text-muted);
     line-height: 1.5;
     margin-bottom: 1rem;
 }
 
 .experience-status {
-    font-size: 0.8rem;
-    color: #777777;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
     margin-top: auto;
 }
