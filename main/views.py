@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from .models import Award
 
 from main.models import Experience
 
@@ -22,3 +23,14 @@ def show_experience(request):
         "experience_list": Experience.objects.all(),
     }
     return render(request, "experience.html", context)
+
+def show_awards(request):
+    competitions = Award.objects.filter(section='competition')
+    certifications = Award.objects.filter(section='certification')
+    
+    context = {
+        'name': 'Angga Restha Rustyanto',
+        'competitions': competitions,
+        'certifications': certifications,
+    }
+    return render(request, 'awards.html', context)

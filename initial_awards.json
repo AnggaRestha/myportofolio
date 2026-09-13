@@ -1,0 +1,86 @@
+[
+{
+  "model": "main.award",
+  "pk": "310e222e-c361-415b-bf33-c0a7717b3c08",
+  "fields": {
+    "title": "3rd Place, JakBee Business Plan",
+    "description": "Regional business competition focused on practical innovation.",
+    "section": "competition",
+    "badge_text": "TOP 3",
+    "location": "DKI Jakarta",
+    "created_at": "2026-09-13T16:25:33.170Z"
+  }
+},
+{
+  "model": "main.award",
+  "pk": "37caf9fc-0a19-4d97-9710-dcab0edd935f",
+  "fields": {
+    "title": "Visitor National CyberSecurity Connect 2025",
+    "description": "Participated in national cybersecurity conference at Hotel Bidakara.",
+    "section": "competition",
+    "badge_text": "EVENT",
+    "location": "Jakarta",
+    "created_at": "2026-09-13T16:25:33.251Z"
+  }
+},
+{
+  "model": "main.award",
+  "pk": "590922c8-2b53-4be1-a3df-e1b194e08e77",
+  "fields": {
+    "title": "Fortinet Certified Associate in CyberSecurity",
+    "description": "Network Defense & Cybersecurity Fundamentals",
+    "section": "certification",
+    "badge_text": "FORTINET",
+    "location": null,
+    "created_at": "2026-09-13T16:25:33.356Z"
+  }
+},
+{
+  "model": "main.award",
+  "pk": "683853e3-937d-4647-8dc6-de2bd5a57b1e",
+  "fields": {
+    "title": "Omada Certified Network Administrator (OCNA) Wireless",
+    "description": "Enterprise Wireless Network Infrastructure",
+    "section": "certification",
+    "badge_text": "TP-LINK OMADA",
+    "location": null,
+    "created_at": "2026-09-13T16:25:33.327Z"
+  }
+},
+{
+  "model": "main.award",
+  "pk": "a785c529-cafa-4a56-a898-1471377033c0",
+  "fields": {
+    "title": "Ruijie Certified Network Associate (RCNA) WLAN",
+    "description": "Wireless LAN Architecture & Deployment",
+    "section": "certification",
+    "badge_text": "RUIJIE NETWORKS",
+    "location": null,
+    "created_at": "2026-09-13T16:25:33.377Z"
+  }
+},
+{
+  "model": "main.award",
+  "pk": "aadfb636-ae8e-4d06-af20-4ee0feda26b5",
+  "fields": {
+    "title": "3rd LKS Internal IT Network System Administrator",
+    "description": "Competitive IT infrastructure & system administration showcase.",
+    "section": "competition",
+    "badge_text": "TOP 3",
+    "location": "DKI Jakarta",
+    "created_at": "2026-09-13T16:25:33.210Z"
+  }
+},
+{
+  "model": "main.award",
+  "pk": "e8b73a5a-4bd9-4118-9d0c-3939ca225051",
+  "fields": {
+    "title": "Ruijie Certified Network Associate (RCNA) Routing & Switching",
+    "description": "Enterprise Routing & Switching Systems",
+    "section": "certification",
+    "badge_text": "RUIJIE NETWORKS",
+    "location": null,
+    "created_at": "2026-09-13T16:25:33.463Z"
+  }
+}
+]

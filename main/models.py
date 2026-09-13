@@ -24,3 +24,20 @@ class Experience(models.Model):
     @property
     def is_ongoing(self):
         return self.ended_at is None
+
+class Award(models.Model):
+    SECTION_CHOICES = [
+        ('competition', 'Competition & Events'),
+        ('certification', 'Professional Certifications'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    section = models.CharField(max_length=20, choices=SECTION_CHOICES, default='competition')
+    badge_text = models.CharField(max_length=100, blank=True, null=True)  # Misal: 'TOP 3', 'EVENT', 'TP-LINK OMADA'
+    location = models.CharField(max_length=100, blank=True, null=True)    # Misal: 'DKI Jakarta'
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
