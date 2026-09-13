@@ -1,13 +1,37 @@
 [
 {
   "model": "main.experience",
-  "pk": "fae7907f-3996-4e55-99c4-fe599efb99c9",
+  "pk": "5f4dc92c-acfa-4ef7-a3cd-b79795af349f",
   "fields": {
-    "title": "Asisten Dosen PBP",
-    "description": "Membantu mahasiswa memahami dasar pengembangan web.",
-    "category": "part-time",
+    "title": "Technician | Network Engineer",
+    "description": "Installation Data Center, Configuration Data Center, Migration Data Center, and Installation Fortigate",
+    "category": "full-time",
     "thumbnail": null,
-    "started_at": "2026-09-09T10:23:25.638Z",
+    "started_at": "2026-09-13T16:04:53.201Z",
+    "ended_at": null
+  }
+},
+{
+  "model": "main.experience",
+  "pk": "ae7394c9-2093-4015-b7e9-e0fcc72c105b",
+  "fields": {
+    "title": "Supervisor | Network Engineer",
+    "description": "Installation, Configuration, Testing 134 AP 9116D1-MR Meraki, 26 AP MR44 Meraki, 20 Switch MS130-12x Meraki, 8 Switch MS130-24x Meraki, 4 Switch UPLINK MS130-8, 2 Core Switch C9300-48S-M",
+    "category": "full-time",
+    "thumbnail": null,
+    "started_at": "2026-09-13T16:04:53.075Z",
+    "ended_at": null
+  }
+},
+{
+  "model": "main.experience",
+  "pk": "f308c0ef-4863-4cbc-8a9c-e11d5545bb7d",
+  "fields": {
+    "title": "Technician | Network Engineer",
+    "description": "Troubleshoot Infrastructure, Data Migration, Replacement Device, and Monitoring Network Device all site BMKG in Indonesia",
+    "category": "full-time",
+    "thumbnail": null,
+    "started_at": "2026-09-13T16:04:53.150Z",
     "ended_at": null
   }
 }
