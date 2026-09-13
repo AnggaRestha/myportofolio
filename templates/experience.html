@@ -9,49 +9,87 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        .experience-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+            gap: 1.5rem !important;
+            margin-top: 2rem !important;
+        }
+
+        .experience-card {
+            background-color: #ffffff !important;
+            border: 2px solid #1a1a1a !important;
+            padding: 1.5rem !important;
+            box-shadow: 4px 4px 0px #1a1a1a !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-start !important;
+            border-radius: 0px !important;
+        }
+
+        .experience-category {
+            color: #c0392b !important;
+            font-weight: 700 !important;
+            font-size: 0.85rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            margin-bottom: 0.5rem !important;
+            display: block !important;
+        }
+
+        .experience-card h2 {
+            font-size: 1.25rem !important;
+            font-weight: 700 !important;
+            margin-bottom: 0.75rem !important;
+            color: #1a1a1a !important;
+        }
+
+        .experience-description {
+            font-size: 0.9rem !important;
+            color: #555555 !important;
+            line-height: 1.5 !important;
+            margin-bottom: 0 !important;
+        }
+    </style>
 </head>
 <body>
     <header class="site-header">
         <div class="container">
             <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
-        <nav>
-            <a href="{% url 'main:show_main' %}">Profile</a>
-            <a href="{% url 'main:show_experience' %}">Experience</a>
-        </nav>
+            <nav>
+                <a href="{% url 'main:show_main' %}">Profile</a>
+                <a href="{% url 'main:show_experience' %}">Experience</a>
+            </nav>
         </div>
     </header>
 
     <main>
         <section class="experience-section" id="experience">
-        <div class="container">
-            <p class="section-kicker">Perjalanan saya sejauh ini</p>
-            <h1>Experience</h1>
+            <div class="container">
+                <p class="section-kicker">Perjalanan saya sejauh ini</p>
+                <h1>Experience</h1>
 
-            <div class="experience-grid">
-                {% for experience in experience_list %}
-                    <article class="experience-card">
-                        <span class="experience-category">
-                            {{ experience.get_category_display }}
-                        </span>
-                        <h2>{{ experience.title }}</h2>
-                        <p class="experience-description">
-                            {{ experience.description }}
+                <div class="experience-grid">
+                    {% for experience in experience_list %}
+                        <article class="experience-card">
+                            <span class="experience-category">
+                                {{ experience.category }}
+                            </span>
+                            <h2>{{ experience.title }}</h2>
+                            <p class="experience-description">
+                                {{ experience.description }}
+                            </p>
+                        </article>
+                    {% empty %}
+                        <p class="empty-state">
+                            Belum ada pengalaman yang ditambahkan.
                         </p>
-
-                        {% if experience.is_ongoing %}
-                            <p class="experience-status">Sedang berlangsung</p>
-                        {% else %}
-                            <p class="experience-status">Selesai</p>
-                        {% endif %}
-                    </article>
-                {% empty %}
-                    <p class="empty-state">
-                        Belum ada pengalaman yang ditambahkan.
-                    </p>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
     </main>
 
     <footer class="site-footer">

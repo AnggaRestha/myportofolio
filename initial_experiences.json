@@ -1,37 +1,37 @@
 [
 {
   "model": "main.experience",
-  "pk": "5f4dc92c-acfa-4ef7-a3cd-b79795af349f",
+  "pk": "484fe72e-c6f0-42e7-866e-8244a56a5cb4",
   "fields": {
     "title": "Technician | Network Engineer",
     "description": "Installation Data Center, Configuration Data Center, Migration Data Center, and Installation Fortigate",
-    "category": "full-time",
+    "category": "BANK INDONESIA - COMPNET",
     "thumbnail": null,
-    "started_at": "2026-09-13T16:04:53.201Z",
+    "started_at": "2026-09-13T16:14:37.457Z",
     "ended_at": null
   }
 },
 {
   "model": "main.experience",
-  "pk": "ae7394c9-2093-4015-b7e9-e0fcc72c105b",
-  "fields": {
-    "title": "Supervisor | Network Engineer",
-    "description": "Installation, Configuration, Testing 134 AP 9116D1-MR Meraki, 26 AP MR44 Meraki, 20 Switch MS130-12x Meraki, 8 Switch MS130-24x Meraki, 4 Switch UPLINK MS130-8, 2 Core Switch C9300-48S-M",
-    "category": "full-time",
-    "thumbnail": null,
-    "started_at": "2026-09-13T16:04:53.075Z",
-    "ended_at": null
-  }
-},
-{
-  "model": "main.experience",
-  "pk": "f308c0ef-4863-4cbc-8a9c-e11d5545bb7d",
+  "pk": "cb736d90-3006-4c93-9d50-65eba1c73d9f",
   "fields": {
     "title": "Technician | Network Engineer",
     "description": "Troubleshoot Infrastructure, Data Migration, Replacement Device, and Monitoring Network Device all site BMKG in Indonesia",
-    "category": "full-time",
+    "category": "BMKG - COMPNET",
     "thumbnail": null,
-    "started_at": "2026-09-13T16:04:53.150Z",
+    "started_at": "2026-09-13T16:14:37.432Z",
+    "ended_at": null
+  }
+},
+{
+  "model": "main.experience",
+  "pk": "e20179a8-1ed8-4c2f-9124-16877251e30f",
+  "fields": {
+    "title": "Supervisor | Network Engineer",
+    "description": "Installation, Configuration, Testing 134 AP 9116D1-MR Meraki, 26 AP MR44 Meraki, 20 Switch MS130-12x Meraki, 8 Switch MS130-24x Meraki, 4 Switch UPLINK MS130-8, 2 Core Switch C9300-48S-M",
+    "category": "UNIQLO - COMPNET",
+    "thumbnail": null,
+    "started_at": "2026-09-13T16:14:37.391Z",
     "ended_at": null
   }
 }

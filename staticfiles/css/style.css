@@ -465,3 +465,52 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     font-size: 0.85rem;
     font-weight: 600;
 }
+
+/* Container Grid */
+.experience-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Card Style Neubrutalism / Border Tebal */
+.experience-card {
+    background-color: #ffffff;
+    border: 2px solid #1a1a1a;
+    padding: 1.5rem;
+    box-shadow: 4px 4px 0px #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.experience-category {
+    color: #c0392b;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.experience-card h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #1a1a1a;
+}
+
+.experience-description {
+    font-size: 0.9rem;
+    color: #555555;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.experience-status {
+    font-size: 0.8rem;
+    color: #777777;
+    margin-top: auto;
+}
