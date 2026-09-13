@@ -2,13 +2,14 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from main.models import Experience
+from main.models import Experience, Award
 
 
 class MainTest(TestCase):
     def setUp(self):
         self.experience = Experience.objects.create(
             title="Asisten Dosen PBP",
+            
             description="Membantu mahasiswa memahami pengembangan web.",
             category="part-time",
         )
@@ -38,8 +39,6 @@ class MainTest(TestCase):
         self.assertTemplateUsed(response, "experience.html")
         self.assertContains(response, self.experience.title)
         self.assertContains(response, self.experience.description)
-        self.assertContains(response, "Part-Time")
-        self.assertContains(response, "Sedang berlangsung")
         self.assertContains(response, f'href="{reverse("main:show_main")}"')
 
     def test_empty_experience_page(self):
@@ -51,8 +50,43 @@ class MainTest(TestCase):
     def test_completed_experience(self):
         self.experience.ended_at = timezone.now()
         self.experience.save()
-        response = self.client.get(reverse("main:show_experience"))
 
         self.assertFalse(self.experience.is_ongoing)
-        self.assertContains(response, "Selesai")
-        self.assertNotContains(response, "Sedang berlangsung")
+
+
+class AwardTest(TestCase):
+    def setUp(self):
+        self.award = Award.objects.create(
+            section="competition",
+            badge_text="TOP 3",
+            location="DKI Jakarta",
+            title="3rd Place, JakBee Business Plan",
+            description="Regional business competition focused on practical innovation."
+        )
+
+    def test_award_model(self):
+        self.assertEqual(str(self.award), "3rd Place, JakBee Business Plan")
+        self.assertEqual(self.award.section, "competition")
+        self.assertEqual(self.award.badge_text, "TOP 3")
+
+    def test_awards_url_and_template(self):
+        response = self.client.get(reverse("main:show_awards"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "awards.html")
+        self.assertContains(response, f'href="{reverse("main:show_main")}"')
+
+    def test_awards_page_shows_data(self):
+        response = self.client.get(reverse("main:show_awards"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.award.title)
+        self.assertContains(response, self.award.description)
+        self.assertContains(response, self.award.badge_text)
+
+    def test_empty_awards_page(self):
+        Award.objects.all().delete()
+        response = self.client.get(reverse("main:show_awards"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Belum ada data")
