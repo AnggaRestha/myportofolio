@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Experience - {{ name }}</title>
+    <title>Projects - {{ name }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -27,24 +27,36 @@
     </header>
 
     <main>
-        <section class="experience-section" id="experience">
+        <section class="experience-section" id="projects">
             <div class="container">
-                <h1>Experiences Saya Sejauh Ini...</h1>
+                <h1>Proyek Saya</h1>
+
+                <a href="{% url 'main:create_project' %}" class="button">Tambah Proyek</a>
 
                 <div class="experience-grid">
-                    {% for experience in experience_list %}
+                    {% for project in project_list %}
                         <article class="experience-card">
-                            <span class="experience-category">
-                                {{ experience.category }}
-                            </span>
-                            <h2>{{ experience.title }}</h2>
+                            {% if project.project_image_url %}
+                            <img src="{{ project.project_image_url }}" alt="{{ project.title }}" class="project-thumbnail">
+                            {% endif %}
+                            <h2>{{ project.title }}</h2>
                             <p class="experience-description">
-                                {{ experience.description }}
+                                {{ project.description }}
                             </p>
+                            <p class="experience-status">
+                                {{ project.tech_stack }}
+                            </p>
+
+                            <div class="project-card-actions">
+                            {% if project.project_url %}
+                                <a href="{{ project.project_url }}" target="_blank" rel="noopener" class="button button-secondary">Lihat Proyek</a>
+                            {% endif %}
+                            {% include "components/project_delete_modal.html" %}
+                            </div>
                         </article>
                     {% empty %}
                         <p class="empty-state">
-                            Belum ada pengalaman yang ditambahkan.
+                            Belum ada proyek yang ditambahkan.
                         </p>
                     {% endfor %}
                 </div>

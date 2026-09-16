@@ -136,6 +136,8 @@ MAILERS = {
     },
 }
 
+PROJECT_SECRET_CODE = os.getenv('PROJECT_SECRET_CODE', '')
+
 # settings.py
 
 CSRF_TRUSTED_ORIGINS = [
