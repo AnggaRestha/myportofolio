@@ -1,206 +1,194 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Awards & Certifications - {{ name }}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
-    <style>
-        body {
-            background-color: var(--paper);
-            font-family: 'Space Grotesk', sans-serif;
-            color: var(--ink);
-        }
+{% block title %}Awards & Certifications - {{ name }}{% endblock title %}
 
-        .section-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            margin-top: 2.5rem;
-            margin-bottom: 1.25rem;
-            color: var(--ink);
-        }
+{% block meta %}
+<style>
+    body {
+        background-color: var(--paper);
+        font-family: 'Space Grotesk', sans-serif;
+        color: var(--ink);
+    }
 
-        .awards-grid {
-            display: grid !important;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
-            gap: 1.5rem !important;
-        }
+    .section-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin-top: 2.5rem;
+        margin-bottom: 1.25rem;
+        color: var(--ink);
+    }
 
-        .cert-grid {
-            display: grid !important;
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)) !important;
-            gap: 1.5rem !important;
-        }
+    .awards-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+        gap: 1.5rem !important;
+    }
 
-        /* CARD STYLE 1: Competition & Events */
-        .comp-card {
-            background-color: var(--surface) !important;
-            border: 2px solid var(--ink) !important;
-            padding: 1.5rem !important;
-            box-shadow: 4px 4px 0px #000000 !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
-            cursor: pointer !important;
-            transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-        }
+    .cert-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)) !important;
+        gap: 1.5rem !important;
+    }
 
-        .comp-card:hover {
-            transform: translate(-3px, -3px) !important;
-            box-shadow: 7px 7px 0px var(--accent) !important;
-        }
+    .comp-card {
+        background-color: var(--surface) !important;
+        border: 2px solid var(--ink) !important;
+        padding: 1.5rem !important;
+        box-shadow: 4px 4px 0px #000000 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        cursor: pointer !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
 
-        .card-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
+    .comp-card:hover {
+        transform: translate(-3px, -3px) !important;
+        box-shadow: 7px 7px 0px var(--accent) !important;
+    }
 
-        .badge-pill {
-            border: 1px solid var(--ink);
-            border-radius: 4px;
-            padding: 2px 8px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            background-color: #eab308;
-            color: #1a1400;
-        }
+    .card-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
 
-        .location-text {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
+    .badge-pill {
+        border: 1px solid var(--ink);
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        background-color: #eab308;
+        color: #1a1400;
+    }
 
-        .comp-card h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            line-height: 1.3;
-            color: var(--ink);
-        }
+    .location-text {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
 
-        .comp-card p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            line-height: 1.4;
-            margin: 0;
-        }
+    .comp-card h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+        color: var(--ink);
+    }
 
-        /* CARD STYLE 2: Professional Certifications */
-        .cert-card {
-            background-color: var(--surface) !important;
-            border: 1px solid var(--line) !important;
-            border-left: 4px solid var(--accent) !important;
-            padding: 1.25rem 1.5rem !important;
-            box-shadow: 0px 2px 4px rgba(0,0,0,0.4) !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
-            cursor: pointer !important;
-            transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-            border-radius: 4px;
-        }
+    .comp-card p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+        margin: 0;
+    }
 
-        .cert-card:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0px 6px 12px rgba(0,0,0,0.5) !important;
-        }
+    .cert-card {
+        background-color: var(--surface) !important;
+        border: 1px solid var(--line) !important;
+        border-left: 4px solid var(--accent) !important;
+        padding: 1.25rem 1.5rem !important;
+        box-shadow: 0px 2px 4px rgba(0,0,0,0.4) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        cursor: pointer !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        border-radius: 4px;
+    }
 
-        .cert-category {
-            color: var(--accent-dark);
-            font-weight: 700;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    .cert-card:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0px 6px 12px rgba(0,0,0,0.5) !important;
+    }
 
-        .green-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #4ade80;
-            border-radius: 50%;
-            display: inline-block;
-        }
+    .cert-category {
+        color: var(--accent-dark);
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-        .cert-card h3 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin: 0.5rem 0;
-            line-height: 1.35;
-            color: var(--ink);
-        }
+    .green-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #4ade80;
+        border-radius: 50%;
+        display: inline-block;
+    }
 
-        .cert-card p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin: 0;
-        }
-    </style>
-</head>
-<body>
-    <header class="site-header">
-        <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_awards' %}">Awards & Certifications</a>
-                <a href="{% url 'main:show_projects' %}">Projects</a>
-            </nav>
+    .cert-card h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+        line-height: 1.35;
+        color: var(--ink);
+    }
+
+    .cert-card p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+</style>
+{% endblock meta %}
+
+{% block content %}
+<main>
+    <div class="container my-4">
+        <h1 class="fw-bold mb-4">Awards & Certifications</h1>
+
+        <a href="{% url 'main:create_award' %}" class="button">Tambah Award</a>
+
+        <h2 class="section-title">Competition & Events</h2>
+        <div class="awards-grid">
+            {% for item in competitions %}
+                <article class="comp-card">
+                    <div class="card-header-row">
+                        <span class="badge-pill">{{ item.badge_text }}</span>
+                        <span class="location-text">{{ item.location }}</span>
+                    </div>
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.description }}</p>
+                    <div class="card-header-row" style="margin-top: 1rem; margin-bottom: 0;">
+                        <a href="{% url 'main:update_award' item.id %}" class="button button-secondary">Edit</a>
+                        <form method="post" action="{% url 'main:delete_award' item.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="button button-danger">Hapus</button>
+                        </form>
+                    </div>
+                </article>
+            {% empty %}
+                <p>Belum ada data kompetisi.</p>
+            {% endfor %}
         </div>
-    </header>
 
-    <main>
-        <div class="container my-4">
-            <h1 class="fw-bold mb-4">Awards & Certifications</h1>
-
-            <!-- Competition & Events -->
-            <h2 class="section-title">Competition & Events</h2>
-            <div class="awards-grid">
-                {% for item in competitions %}
-                    <article class="comp-card">
-                        <div class="card-header-row">
-                            <span class="badge-pill">{{ item.badge_text }}</span>
-                            <span class="location-text">{{ item.location }}</span>
-                        </div>
-                        <h3>{{ item.title }}</h3>
-                        <p>{{ item.description }}</p>
-                    </article>
-                {% empty %}
-                    <p>Belum ada data kompetisi.</p>
-                {% endfor %}
-            </div>
-
-            <!-- Professional Certifications -->
-            <h2 class="section-title">Professional Certifications</h2>
-            <div class="cert-grid">
-                {% for cert in certifications %}
-                    <article class="cert-card">
-                        <div class="card-header-row">
-                            <span class="cert-category">{{ cert.badge_text }}</span>
-                            <span class="green-dot"></span>
-                        </div>
-                        <h3>{{ cert.title }}</h3>
-                        <p>{{ cert.description }}</p>
-                    </article>
-                {% empty %}
-                    <p>Belum ada data sertifikasi.</p>
-                {% endfor %}
-            </div>
+        <h2 class="section-title">Professional Certifications</h2>
+        <div class="cert-grid">
+            {% for cert in certifications %}
+                <article class="cert-card">
+                    <div class="card-header-row">
+                        <span class="cert-category">{{ cert.badge_text }}</span>
+                        <span class="green-dot"></span>
+                    </div>
+                    <h3>{{ cert.title }}</h3>
+                    <p>{{ cert.description }}</p>
+                    <div class="card-header-row" style="margin-top: 1rem; margin-bottom: 0;">
+                        <a href="{% url 'main:update_award' cert.id %}" class="button button-secondary">Edit</a>
+                        <form method="post" action="{% url 'main:delete_award' cert.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="button button-danger">Hapus</button>
+                        </form>
+                    </div>
+                </article>
+            {% empty %}
+                <p>Belum ada data sertifikasi.</p>
+            {% endfor %}
         </div>
-    </main>
-
-    <footer class="site-footer mt-5">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
-        </div>
-    </footer>
-</body>
-</html>
+    </div>
+</main>
+{% endblock content %}

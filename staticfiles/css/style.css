@@ -554,6 +554,7 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
 
 .button-secondary {
     background: var(--ink);
+    color: var(--paper);
 }
 
 .project-header {
@@ -636,13 +637,31 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    align-items: center;
+    align-items: stretch;
     gap: 0.75rem;
     margin-top: auto;
 }
 
-.hide {
-    display: none !important;
+.project-card-actions .experience-status {
+    margin: 0;
+    flex: 1;
+}
+
+.project-card-actions .button {
+    flex: 1;
+    width: 100%;
+    padding: 0.7rem 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: var(--radius);
+    line-height: 1.2;
+    box-sizing: border-box;
+}
+
+.project-card-actions .button-secondary,
+.project-card-actions .button-danger {
+    background: #b42318;
 }
 
 .project-actions .experience-status {

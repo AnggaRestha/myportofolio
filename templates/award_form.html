@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block meta %}
+    <title>{% if award %}Edit Award{% else %}Add Award{% endif %} - {{ name }}</title>
+{% endblock meta %}
+{% block content %}
+    <main>
+        <section class="experience-section">
+            <div class="container">
+                <h1>{% if award %}Edit Award{% else %}Add New Award{% endif %}</h1>
+                <form method="post"
+                      action="{% if award %}{% url 'main:update_award' award.id %}{% else %}{% url 'main:create_award' %}{% endif %}"
+                      class="project-form">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}
+                                <p class="form-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="button">{% if award %}Simpan Perubahan{% else %}Tambah Award{% endif %}</button>
+                    <a href="{% url 'main:show_awards' %}" class="button button-secondary">Batal</a>
+                </form>
+            </div>
+        </section>
+    </main>
+{% endblock content %}

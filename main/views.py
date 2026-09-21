@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from main.models import Project
-from main.forms import ProjectForm
+from main.forms import ProjectForm, AwardForm
 from .models import Award
 from django.contrib import messages
 from django.core import serializers
@@ -32,16 +32,87 @@ def show_experience(request):
     }
     return render(request, "experience.html", context)
 
+
 def show_awards(request):
-    competitions = Award.objects.filter(section='competition')
-    certifications = Award.objects.filter(section='certification')
-    
+    json_response = get_awards_json(request)
+
+    awards = serializers.deserialize(
+        "json",
+        json_response.content.decode("utf-8"),
+    )
+    awards = [award.object for award in awards]
+
+    competitions = [a for a in awards if a.section == "competition"]
+    certifications = [a for a in awards if a.section == "certification"]
+
     context = {
-        'name': 'Angga Restha Rustyanto',
-        'competitions': competitions,
-        'certifications': certifications,
+        "name": "Angga Restha Rustyanto",
+        "competitions": competitions,
+        "certifications": certifications,
     }
-    return render(request, 'awards.html', context)
+    return render(request, "awards.html", context)
+
+
+def get_awards_json(request):
+    awards = Award.objects.all()
+    awards_json = serializers.serialize("json", awards)
+    return HttpResponse(awards_json, content_type="application/json")
+
+
+def create_award(request):
+    form = AwardForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        if form.cleaned_data["secret_code"] != settings.PROJECT_SECRET_CODE:
+            form.add_error("secret_code", "Kode rahasia salah.")
+        else:
+            award = form.save(commit=False)
+            award.save()
+            messages.success(request, "Award baru berhasil ditambahkan!")
+            return redirect("main:show_awards")
+
+    context = {
+        "name": "Angga Restha Rustyanto",
+        "form": form,
+    }
+    return render(request, "award_form.html", context)
+
+
+def update_award(request, award_id):
+    award = get_object_or_404(Award, pk=award_id)
+    form = AwardForm(request.POST or None, instance=award)
+
+    if request.method == "POST" and form.is_valid():
+        if form.cleaned_data["secret_code"] != settings.PROJECT_SECRET_CODE:
+            form.add_error("secret_code", "Kode rahasia salah.")
+        else:
+            form.save()
+            messages.success(request, "Award berhasil diperbarui!")
+            return redirect("main:show_awards")
+
+    context = {
+        "name": "Angga Restha Rustyanto",
+        "form": form,
+        "award": award,
+    }
+    return render(request, "award_form.html", context)
+
+
+def delete_award(request, award_id):
+    award = get_object_or_404(Award, pk=award_id)
+
+    if request.method == "POST":
+        secret_code = request.POST.get("secret_code", "")
+        if secret_code != settings.PROJECT_SECRET_CODE:
+            messages.error(request, "Kode rahasia salah, award tidak dihapus.")
+            return redirect("main:show_awards")
+
+        award.delete()
+        messages.success(request, "Award berhasil dihapus!")
+        return redirect("main:show_awards")
+
+    return redirect("main:show_awards")
+
 
 def create_project(request):
     form = ProjectForm(request.POST or None)
