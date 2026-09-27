@@ -1,7 +1,8 @@
+from dj_database_url import register
 from django.urls import path
 from main.views import (
-    create_project, delete_project, get_projects_json, show_projects,
-    show_awards, get_awards_json, create_award, update_award, delete_award,
+    create_project, delete_project, get_projects_json, login_user, logout_user, show_projects,
+    show_awards, get_awards_json, create_award, toggle_star, update_award, delete_award,register,login,
 )
 from main.views import show_main, show_experience
 
@@ -20,4 +21,12 @@ urlpatterns = [
     path("awards/<uuid:award_id>/edit/", update_award, name="update_award"),
     path("awards/<uuid:award_id>/delete/", delete_award, name="delete_award"),
     path("api/awards/", get_awards_json, name="get_awards_json"),
+
+    path("register/", register, name="register"),
+    path("login/", login_user, name="login"),
+    path("logout/", logout_user, name="logout"),
+
+    # Tambahkan path ini ke dalam urlpatterns
+# Tambahkan path ini ke dalam urlpatterns
+    path("projects/<uuid:project_id>/star/", toggle_star, name="toggle_star"),
 ]

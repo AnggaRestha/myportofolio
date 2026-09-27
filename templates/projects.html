@@ -9,7 +9,9 @@
         <div class="container">
             <h1>Proyek Saya</h1>
 
+            {% if user.is_superuser %}
             <a href="{% url 'main:create_project' %}" class="button">Tambah Proyek</a>
+            {% endif %}
 
             <div class="experience-grid">
                 {% for project in project_list %}
@@ -29,7 +31,14 @@
                         {% if project.project_url %}
                             <a href="{{ project.project_url }}" target="_blank" rel="noopener" class="button button-secondary">Lihat Proyek</a>
                         {% endif %}
+                        
+                    
+                        {% include "components/project_star.html" with project=project %}
+
+                        {% if user.is_superuser %}
                         {% include "components/project_delete_modal.html" %}
+                        {% endif %}
+
                         </div>
                     </article>
                 {% empty %}
