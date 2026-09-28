@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from main.models import Project
 from main.forms import ProjectForm, AwardForm
 from .models import Award
@@ -14,6 +13,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied        
 
 from main.models import Experience
+
+def is_editor_or_admin(user):
+    return user.is_authenticated and (user.is_superuser or user.groups.filter(name='Editor').exists())
 
 
 def show_main(request):
@@ -55,6 +57,7 @@ def show_awards(request):
         "name": "Angga Restha",
         "competitions": competitions,
         "certifications": certifications,
+        "is_editor": is_editor_or_admin(request.user),
     }
     return render(request, "awards.html", context)
 
@@ -66,7 +69,7 @@ def get_awards_json(request):
 
 @login_required(login_url="/login/")
 def create_award(request):
-    if not request.user.is_superuser:
+    if not is_editor_or_admin(request.user):
         raise PermissionDenied
     form = AwardForm(request.POST or None)
 
@@ -85,8 +88,11 @@ def create_award(request):
     }
     return render(request, "award_form.html", context)
 
-
+@login_required(login_url="/login/")
 def update_award(request, award_id):
+    if not is_editor_or_admin(request.user):
+        raise PermissionDenied
+    
     award = get_object_or_404(Award, pk=award_id)
     form = AwardForm(request.POST or None, instance=award)
 
@@ -105,8 +111,11 @@ def update_award(request, award_id):
     }
     return render(request, "award_form.html", context)
 
-
+@login_required(login_url="/login/")
 def delete_award(request, award_id):
+    if not is_editor_or_admin(request.user):
+        raise PermissionDenied
+    
     award = get_object_or_404(Award, pk=award_id)
 
     if request.method == "POST":
@@ -121,9 +130,10 @@ def delete_award(request, award_id):
 
     return redirect("main:show_awards")
 
+
 @login_required(login_url="/login/")
 def create_project(request):
-    if not request.user.is_superuser:
+    if not is_editor_or_admin(request.user):
         raise PermissionDenied
     
     form = ProjectForm(request.POST or None)
@@ -157,6 +167,7 @@ def show_projects(request):
         "name": "Angga Restha",
         "project_list": projects,
         "title_query": title_query,
+        "is_editor": is_editor_or_admin(request.user),  
     }
     return render(request, "projects.html", context)
 
@@ -173,7 +184,12 @@ def get_projects_json(request):
     
     return HttpResponse(projects_json, content_type="application/json")
 
+
+@login_required(login_url="/login/")
 def delete_project(request, project_id):
+    if not is_editor_or_admin(request.user):
+        raise PermissionDenied
+
     project = get_object_or_404(Project, pk=project_id)
 
     if request.method == "POST":
@@ -197,7 +213,7 @@ def register(request):
         return redirect("main:login")
 
     context = {
-        "name" : "burhan",
+        "name" : "Angga Restha",
         "form" : form,
     }
     return render(request, "register.html", context)
@@ -219,8 +235,8 @@ def login_user(request):
         return response
 
     context = {
-        "name": "Burhan",
-        "form": form,
+        "name": "Angga Restha",
+            "form": form,
     }
     return render(request, "login.html", context)
 

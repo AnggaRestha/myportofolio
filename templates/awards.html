@@ -142,7 +142,7 @@
     <div class="container my-4">
         <h1 class="fw-bold mb-4">Awards & Certifications</h1>
 
-        {% if user.is_superuser %}
+        {% if is_editor %}
         <a href="{% url 'main:create_award' %}" class="button">Tambah Award</a>
         {% endif %}
 
@@ -158,13 +158,13 @@
                     <p>{{ item.description }}</p>
                     <div class="card-header-row" style="margin-top: 1rem; margin-bottom: 0;">
                         
-                        {% if user.is_superuser %}
+                        {% if is_editor %}
                         <a href="{% url 'main:update_award' item.id %}" class="button button-secondary">Edit</a>
                         {% endif %}
 
                         <form method="post" action="{% url 'main:delete_award' item.id %}">
                             {% csrf_token %}
-                            {% if user.is_superuser %}
+                            {% if is_editor %}
                             <button type="submit" class="button button-danger">Hapus</button>
                             {% endif %}
 
@@ -188,7 +188,7 @@
                     <p>{{ cert.description }}</p>
                     <div class="card-header-row" style="margin-top: 1rem; margin-bottom: 0;">
                         
-                        {% if user.is_superuser %}
+                        {% if is_editor %}
                         <a href="{% url 'main:update_award' cert.id %}" class="button button-secondary">Edit</a>
                         {% endif %}
 

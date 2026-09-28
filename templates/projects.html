@@ -9,7 +9,7 @@
         <div class="container">
             <h1>Proyek Saya</h1>
 
-            {% if user.is_superuser %}
+            {% if is_editor %}
             <a href="{% url 'main:create_project' %}" class="button">Tambah Proyek</a>
             {% endif %}
 
@@ -35,7 +35,7 @@
                     
                         {% include "components/project_star.html" with project=project %}
 
-                        {% if user.is_superuser %}
+                        {% if is_editor %}
                         {% include "components/project_delete_modal.html" %}
                         {% endif %}
 
