@@ -1,7 +1,7 @@
 from dj_database_url import register
 from django.urls import path
 from main.views import (
-    create_project, delete_project, get_projects_json, login_user, logout_user, show_projects,
+    create_project, create_project_ajax, delete_project, get_projects_json, login_user, logout_user, show_projects,
     show_awards, get_awards_json, create_award, toggle_star, update_award, delete_award,register,login,
 )
 from main.views import show_main, show_experience
@@ -29,4 +29,5 @@ urlpatterns = [
     # Tambahkan path ini ke dalam urlpatterns
 # Tambahkan path ini ke dalam urlpatterns
     path("projects/<uuid:project_id>/star/", toggle_star, name="toggle_star"),
+    path("projects/add-ajax/", create_project_ajax, name="create_project_ajax"),
 ]
