@@ -1,43 +1,31 @@
-let toastTimer;
+function showToast(title, message, type = 'success') {
+    const toastEl = document.getElementById('toast-component');
+    const titleEl = document.getElementById('toast-title');
+    const messageEl = document.getElementById('toast-message');
 
-function showToast(title, message, type = 'normal', duration = 3000) {
-  const toastComponent = document.getElementById('toast-component');
-  const toastTitle = document.getElementById('toast-title');
-  const toastMessage = document.getElementById('toast-message');
+    if (!toastEl || !titleEl || !messageEl) return;
 
-  if (!toastComponent) return;
+    // Ganti teks di dalam HTML toast lu secara dinamis
+    titleEl.textContent = title;
+    messageEl.textContent = message;
 
-  // Hapus class tipe sebelumnya
-  toastComponent.classList.remove('toast-success', 'toast-error', 'toast-normal');
+    // Set class type
+    toastEl.classList.remove('toast-success', 'toast-error', 'toast-hidden');
+    toastEl.classList.add(`toast-${type}`);
 
-  // Terapkan class baru berdasarkan tipe
-  if (type === 'success') {
-      toastComponent.classList.add('toast-success');
-  } else if (type === 'error') {
-      toastComponent.classList.add('toast-error');
-  } else {
-      toastComponent.classList.add('toast-normal');
-  }
+    // Buka popover HTML-nya
+    if (typeof toastEl.showPopover === 'function') {
+        toastEl.showPopover();
+    } else {
+        toastEl.classList.remove('toast-hidden');
+    }
 
-  // Perbarui konten teks
-  toastTitle.textContent = title;
-  toastMessage.textContent = message;
-
-  // Batalkan timer sebelumnya jika toast masih tampil
-  clearTimeout(toastTimer);
-
-  // Animasi muncul
-  if (!toastComponent.matches(':popover-open')) {
-      toastComponent.showPopover();
-      void toastComponent.offsetHeight; // paksa browser menghitung style agar transisi berjalan
-  }
-  toastComponent.classList.remove('toast-hidden');
-  toastComponent.classList.add('toast-show');
-
-  // Animasi hilang otomatis
-  toastTimer = setTimeout(() => {
-      toastComponent.classList.remove('toast-show');
-      toastComponent.classList.add('toast-hidden');
-      toastTimer = setTimeout(() => toastComponent.hidePopover(), 300);
-  }, duration);
+    // Auto tutup setelah 3 detik
+    setTimeout(() => {
+        if (typeof toastEl.hidePopover === 'function') {
+            toastEl.hidePopover();
+        } else {
+            toastEl.classList.add('toast-hidden');
+        }
+    }, 3000);
 }

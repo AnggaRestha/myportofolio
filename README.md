@@ -54,3 +54,29 @@ soal {% csrf_token %}, ini wajib ditambahin karna buat protek dari serangan CSRF
     -   Objek Python ini gak bisa langsung dikirim sebagai response HTTP, karena HTTP cuma bisa transfer data dalam bentuk teks/string. Makanya perlu proses serialization ngubah objek Python jadi format teks standar (di kasus kita, JSON) pake `serializers.serialize("json", awards)`
     -   Hasil serialize ini di-bungkus jadi `HttpResponse` dengan `content_type="application/json"`, terus dikirim balik ke browser/client
     -   Kalau datanya mau ditampilkan lagi di halaman HTML (bukan cuma buat API), kita perlu proses sebaliknya yaitu deserialization ngubah teks JSON itu balik jadi objek Python lagi (`serializers.deserialize()`), biar bisa diakses field-fieldnya (`.title`, `.description`, dst) dan ditampilin pake template Django (`{{ item.title }}`)
+
+
+Tugas 5 :
+
+1. Pengertian *Debouncing* dan Pentingnya pada Fitur Pencarian AJAX :
+    Debouncing adalah teknik pemrograman yang digunakan untuk membatasi frekuensi eksekusi suatu fungsi asinkron (seperti panggilan API/AJAX) sampai ada jeda waktu tertentu setelah event terakhir dipanggil.
+
+    pentignya adalah :
+        - Mengurangi Jumlah Request ke Server
+        - Meengoptimalkan Performa & Beban Server
+        - Mencegah race condition
+
+2. Fungsi `await` pada `fetch()` dan Dampak Jika Tidak Menggunakannya :
+    `await` digunakan di dalam fungsi `async` untuk menghentikan sementara eksekusi kode sampai proses Promise yang dikembalikan oleh `fetch()` selesai resolved atau rejected.
+    
+    Fungsi Utama `await`: Memungkinkan kita menulis kode asinkron dengan gaya penulisan sinkron yang mudah dibaca, memastikan nilai kembalian dari `fetch()` Response object atau `.json()` benar-benar sudah siap digunakan sebelum baris kode berikutnya dieksekusi.
+
+    ika Tidak Menggunakan `await`: Fungsi `fetch()` akan mengembalikan sebuah objek Promise yang berstatus pending, bukan hasil respon aktual dari server. Jika kita mencoba mengakses properti atau method dari objek tersebut tanpa `await` (misalnya mencoba melakukan `.json()`), eksekusi kode akan berlanjut secara prematur dan menghasilkan error seperti `TypeError: response.json is not a function` atau mendapatkan nilai `undefined`.
+
+
+3. Pengertian Serangan XSS (Cross-Site Scripting) dan Rentannya Rendering via AJAX/JavaScript :
+    Cross-Site Scripting (XSS) adalah kerentanan keamanan web di mana penyerang menyisipkan skrip JavaScript berbahaya ke dalam input data aplikasi yang nantinya dieksekusi oleh browser milik pengguna lain.
+
+    Data yang ditampilkan melalui AJAX/JavaScript lebih rentan terhadap serangan XSS daripada data yang ditampilkan langsung melalui template Django karena:
+        - Pembersihan Otomatis pada Template Django
+        - Rendering Manual di JavaScript

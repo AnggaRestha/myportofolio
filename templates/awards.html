@@ -134,6 +134,95 @@
         color: var(--text-muted);
         margin: 0;
     }
+
+    .hide {
+        display: none !important;
+    }
+
+    .project-search__input {
+        color: #111111;
+        background-color: #ffffff;
+        caret-color: #111111;
+    }
+
+    .project-search__input::placeholder {
+        color: #6b6b6b;
+    }
+
+    .card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .card-actions form {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin: 0;
+    }
+
+    .card-actions .project-search__input {
+        width: 9rem;
+        flex: 0 0 auto;
+    }
+
+    .project-delete-modal {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        width: 90% !important;
+        max-width: 500px !important;
+    }
+
+    .project-delete-modal__content {
+        background-color: var(--surface, #1e1e1e) !important;
+        border: 2px solid var(--ink, #ffffff) !important;
+        padding: 1.5rem !important;
+        border-radius: 8px !important;
+        box-shadow: 6px 6px 0px #000000 !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+        color: var(--ink, #ffffff) !important;
+        box-sizing: border-box !important;
+    }
+
+    #award-form .form-group {
+        margin-bottom: 1rem;
+    }
+
+    #award-form .form-group label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 700;
+    }
+
+    #award-form .form-group input,
+    #award-form .form-group textarea,
+    #award-form .form-group select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.6rem 0.8rem;
+        background-color: #ffffff;
+        color: #111111;
+        border: 1px solid var(--ink, #000000);
+        border-radius: 4px;
+        font: inherit;
+    }
+
+    #award-form-error {
+        color: #f87171;
+        font-size: 0.85rem;
+        margin: 0 0 1rem;
+        font-weight: 700;
+    }
 </style>
 {% endblock meta %}
 
@@ -143,67 +232,331 @@
         <h1 class="fw-bold mb-4">Awards & Certifications</h1>
 
         {% if is_editor %}
-        <a href="{% url 'main:create_award' %}" class="button">Tambah Award</a>
+        <button type="button" class="button" popovertarget="award-modal">Tambah Award</button>
         {% endif %}
 
-        <h2 class="section-title">Competition & Events</h2>
-        <div class="awards-grid">
-            {% for item in competitions %}
-                <article class="comp-card">
-                    <div class="card-header-row">
-                        <span class="badge-pill">{{ item.badge_text }}</span>
-                        <span class="location-text">{{ item.location }}</span>
-                    </div>
-                    <h3>{{ item.title }}</h3>
-                    <p>{{ item.description }}</p>
-                    <div class="card-header-row" style="margin-top: 1rem; margin-bottom: 0;">
-                        
-                        {% if is_editor %}
-                        <a href="{% url 'main:update_award' item.id %}" class="button button-secondary">Edit</a>
-                        {% endif %}
+        <form id="award-search-form" class="project-search" style="margin: 1rem 0;">
+            <input type="search"
+                   id="search-input"
+                   name="title"
+                   placeholder="Cari berdasarkan judul"
+                   class="project-search__input"
+                   aria-label="Cari award berdasarkan judul">
+            <button type="submit" class="button">Cari</button>
+        </form>
 
-                        <form method="post" action="{% url 'main:delete_award' item.id %}">
-                            {% csrf_token %}
-                            {% if is_editor %}
-                            <button type="submit" class="button button-danger">Hapus</button>
-                            {% endif %}
+        <div id="loading" class="empty-state hide"><p>Memuat awards...</p></div>
+        <div id="error" class="empty-state hide"><p>Gagal memuat data awards. Silakan coba lagi.</p></div>
+        <div id="empty" class="empty-state hide"><p>Tidak ada award yang ditemukan.</p></div>
 
-                        </form>
-                    </div>
-                </article>
-            {% empty %}
-                <p>Belum ada data kompetisi.</p>
-            {% endfor %}
-        </div>
+        <div id="content" class="hide">
+            <h2 class="section-title">Competition & Events</h2>
+            <div id="competition-grid" class="awards-grid"></div>
 
-        <h2 class="section-title">Professional Certifications</h2>
-        <div class="cert-grid">
-            {% for cert in certifications %}
-                <article class="cert-card">
-                    <div class="card-header-row">
-                        <span class="cert-category">{{ cert.badge_text }}</span>
-                        <span class="green-dot"></span>
-                    </div>
-                    <h3>{{ cert.title }}</h3>
-                    <p>{{ cert.description }}</p>
-                    <div class="card-header-row" style="margin-top: 1rem; margin-bottom: 0;">
-                        
-                        {% if is_editor %}
-                        <a href="{% url 'main:update_award' cert.id %}" class="button button-secondary">Edit</a>
-                        {% endif %}
-
-                        <form method="post" action="{% url 'main:delete_award' cert.id %}">
-                            {% csrf_token %}
-                            {% if user.is_superuser %}
-                            <button type="submit" class="button button-danger">Hapus</button>
-                            {% endif %}
-                        </form>
-                    </div>
-                </article>
-            {% empty %}
-                <p>Belum ada data sertifikasi.</p>
-            {% endfor %}
+            <h2 class="section-title">Professional Certifications</h2>
+            <div id="certification-grid" class="cert-grid"></div>
         </div>
     </div>
 </main>
+
+{% if is_editor %}
+<div id="award-modal" class="project-delete-modal" popover="auto"
+     role="dialog" aria-labelledby="award-modal-title">
+    <button type="button" class="project-delete-modal__backdrop"
+            popovertarget="award-modal" popovertargetaction="hide"
+            aria-label="Tutup form"></button>
+    <div class="project-delete-modal__content">
+        <button type="button" class="project-delete-modal__close"
+                popovertarget="award-modal" popovertargetaction="hide"
+                aria-label="Tutup form">×</button>
+        <h2 id="award-modal-title">Tambah Award</h2>
+
+        <form id="award-form" novalidate>
+            {% csrf_token %}
+            {% for field in award_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <p id="award-form-error" class="hide"></p>
+            <div class="project-delete-modal__actions">
+                <button type="button" class="button button-secondary"
+                        popovertarget="award-modal" popovertargetaction="hide">Batal</button>
+                <button type="submit" class="button">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="award-delete-modal" class="project-delete-modal" popover="auto"
+     role="dialog" aria-modal="true" aria-labelledby="award-delete-title">
+    <button type="button" class="project-delete-modal__backdrop"
+            popovertarget="award-delete-modal" popovertargetaction="hide"
+            aria-label="Tutup konfirmasi hapus"></button>
+    <div class="project-delete-modal__content">
+        <button type="button" class="project-delete-modal__close"
+                popovertarget="award-delete-modal" popovertargetaction="hide"
+                aria-label="Tutup konfirmasi hapus">×</button>
+        <h2 id="award-delete-title">Hapus Award?</h2>
+        <p>Apakah Anda yakin ingin menghapus <strong id="award-delete-name"></strong>?</p>
+        <div class="project-delete-modal__actions">
+            <button type="button" class="button button-secondary"
+                    popovertarget="award-delete-modal" popovertargetaction="hide">Batal</button>
+            <form id="award-delete-form" method="post" action="">
+                {% csrf_token %}
+                <input type="password" name="secret_code" placeholder="Kode rahasia"
+                       required class="project-search__input">
+                <button type="submit" class="button button-danger">Ya, Hapus</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    const AWARDS_ENDPOINT = "{% url 'main:get_awards_json' %}";
+    const IS_EDITOR = '{{ is_editor|yesno:"true,false" }}' === 'true';
+    const CSRF_TOKEN = "{{ csrf_token }}";
+    const CREATE_AWARD_ENDPOINT = "{% url 'main:create_award_ajax' %}";
+    const TOGGLE_STAR_AWARD_URL = "{% url 'main:toggle_star_award' '00000000-0000-0000-0000-000000000000' %}";
+    const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
+    const EDIT_URL = "{% url 'main:update_award' '00000000-0000-0000-0000-000000000000' %}";
+    const DELETE_URL = "{% url 'main:delete_award' '00000000-0000-0000-0000-000000000000' %}";
+
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const emptyState = document.getElementById('empty');
+    const contentContainer = document.getElementById('content');
+    const competitionGrid = document.getElementById('competition-grid');
+    const certificationGrid = document.getElementById('certification-grid');
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showContent = false }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        contentContainer.classList.toggle('hide', !showContent);
+    }
+
+    function buildEditorActions(pk, title) {
+        if (!IS_EDITOR) return '';
+        return `
+            <a href="${EDIT_URL.replace(ZERO_UUID, pk)}" class="button button-secondary">Edit</a>
+            <button type="button" class="button button-danger js-delete-award"
+                    popovertarget="award-delete-modal"
+                    data-pk="${escapeHtml(pk)}" data-title="${escapeHtml(title)}">Hapus</button>`;
+    }
+
+    function buildStarInfo(award, pk) {
+    const starText = award.is_starred ? '★ Star' : '☆ Star';
+    return `
+        <button type="button" 
+                class="button js-star-btn" 
+                id="star-btn-${escapeHtml(pk)}"
+                data-pk="${escapeHtml(pk)}"
+                style="background-color: #f97316; color: #ffffff; border: 1px solid var(--ink); font-weight: 700; cursor: pointer;">
+            ${starText} ${escapeHtml(award.star_count)}
+        </button>`;
+}
+
+    function buildCompetitionCard(item) {
+        const award = item.fields;
+        const el = document.createElement('article');
+        el.className = 'comp-card';
+        el.innerHTML = `
+            <div class="card-header-row">
+                <span class="badge-pill">${escapeHtml(award.badge_text)}</span>
+                <span class="location-text">${escapeHtml(award.location)}</span>
+            </div>
+            <h3>${escapeHtml(award.title)}</h3>
+            <p>${escapeHtml(award.description)}</p>
+            <div class="card-actions">
+                ${buildStarInfo(award, item.pk)}
+                ${buildEditorActions(item.pk, award.title)}
+            </div>`;
+        return el;
+    }
+
+    function buildCertificationCard(item) {
+        const award = item.fields;
+        const el = document.createElement('article');
+        el.className = 'cert-card';
+        el.innerHTML = `
+            <div class="card-header-row">
+                <span class="cert-category">${escapeHtml(award.badge_text)}</span>
+                <span class="green-dot"></span>
+            </div>
+            <h3>${escapeHtml(award.title)}</h3>
+            <p>${escapeHtml(award.description)}</p>
+            <div class="card-actions">
+                ${buildStarInfo(award, item.pk)}
+                ${buildEditorActions(item.pk, award.title)}
+            </div>`;
+        return el;
+    }
+
+    async function fetchAwards(searchQuery = '') {
+        try {
+            displayPageSection({ showLoading: true });
+
+            const url = searchQuery
+                ? `${AWARDS_ENDPOINT}?title=${encodeURIComponent(searchQuery)}`
+                : AWARDS_ENDPOINT;
+
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+            });
+            if (!response.ok) throw new Error('Failed to fetch data');
+
+            const awardData = await response.json();
+
+            if (awardData.length === 0) {
+                displayPageSection({ showEmpty: true });
+                return;
+            }
+
+            competitionGrid.innerHTML = '';
+            certificationGrid.innerHTML = '';
+
+            awardData.forEach(item => {
+                if (item.fields.section === 'competition') {
+                    competitionGrid.appendChild(buildCompetitionCard(item));
+                } else if (item.fields.section === 'certification') {
+                    certificationGrid.appendChild(buildCertificationCard(item));
+                }
+            });
+
+            displayPageSection({ showContent: true });
+        } catch (error) {
+            console.error('Error loading awards:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    const SEARCH_DEBOUNCE_DELAY = 1000;
+    let searchDebounceTimer;
+
+    const searchForm = document.getElementById('award-search-form');
+    const searchInput = document.getElementById('search-input');
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(function () {
+            fetchAwards(searchInput.value.trim());
+        }, SEARCH_DEBOUNCE_DELAY);
+    });
+
+    searchForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        fetchAwards(searchInput.value.trim());
+    });
+
+    const awardForm = document.getElementById('award-form');
+    const awardModal = document.getElementById('award-modal');
+    const awardFormError = document.getElementById('award-form-error');
+
+    async function addAward(event) {
+        event.preventDefault();
+
+        const submitButton = awardForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        awardFormError.classList.add('hide');
+
+        try {
+            const response = await fetch(CREATE_AWARD_ENDPOINT, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF_TOKEN, 'Accept': 'application/json' },
+                body: new FormData(awardForm),
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (response.status === 201) {
+                awardForm.reset();
+                awardModal.hidePopover();
+                fetchAwards(searchInput.value.trim());
+                
+                if (typeof showToast === 'function') {
+                    showToast('Berhasil!', 'Award berhasil ditambahkan.', 'success');
+                }
+            } else {
+                const messages = result.errors
+                    ? Object.values(result.errors).flat().map(e => e.message)
+                    : [result.message || `Terjadi kesalahan (status ${response.status}).`];
+                
+                const errText = messages.join(' ');
+                awardFormError.textContent = errText;
+                awardFormError.classList.remove('hide');
+
+                if (typeof showToast === 'function') {
+                    showToast('Gagal!', errText, 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error adding award:', error);
+            const connErr = 'Tidak dapat terhubung ke server.';
+            awardFormError.textContent = connErr;
+            awardFormError.classList.remove('hide');
+            
+            if (typeof showToast === 'function') {
+                showToast('Error!', connErr, 'error');
+            }
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    if (awardForm) {
+        awardForm.addEventListener('submit', addAward);
+    }
+
+    const awardDeleteForm = document.getElementById('award-delete-form');
+    const awardDeleteName = document.getElementById('award-delete-name');
+
+    document.addEventListener('click', async function (event) {
+    const starBtn = event.target.closest('.js-star-btn');
+    if (!starBtn) return;
+
+    event.preventDefault();
+    const pk = starBtn.dataset.pk;
+    const url = TOGGLE_STAR_AWARD_URL.replace(ZERO_UUID, pk);
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': CSRF_TOKEN,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            
+            
+            const starText = data.is_starred ? '★ Star' : '☆ Star';
+            starBtn.innerHTML = `${starText} ${data.star_count}`;
+
+            
+            if (typeof showToast === 'function') {
+                const msg = data.is_starred ? 'Berhasil memberi star!' : 'Batal memberi star.';
+                showToast('Star Updated', msg, 'success');
+            }
+        } else if (response.status === 403) {
+            window.location.href = "{% url 'main:login' %}";
+        }
+    } catch (err) {
+        console.error('Error toggling star:', err);
+        }
+    }); 
+
+    fetchAwards();
+</script>
 {% endblock content %}
