@@ -9,7 +9,6 @@ class MainTest(TestCase):
     def setUp(self):
         self.experience = Experience.objects.create(
             title="Asisten Dosen PBP",
-            
             description="Membantu mahasiswa memahami pengembangan web.",
             category="part-time",
         )
@@ -20,7 +19,10 @@ class MainTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "index.html")
         self.assertNotContains(response, self.experience.title)
-        self.assertContains(response, f'href="{reverse("main:show_experience")}"')
+        self.assertContains(
+            response,
+            f'href="{reverse("main:show_experience")}"'
+        )
 
     def test_nonexistent_page_returns_404(self):
         response = self.client.get("/halaman-yang-tidak-ada/")
@@ -39,13 +41,20 @@ class MainTest(TestCase):
         self.assertTemplateUsed(response, "experience.html")
         self.assertContains(response, self.experience.title)
         self.assertContains(response, self.experience.description)
-        self.assertContains(response, f'href="{reverse("main:show_main")}"')
+        self.assertContains(
+            response,
+            f'href="{reverse("main:show_main")}"'
+        )
 
     def test_empty_experience_page(self):
         Experience.objects.all().delete()
+
         response = self.client.get(reverse("main:show_experience"))
 
-        self.assertContains(response, "Belum ada pengalaman yang ditambahkan.")
+        self.assertContains(
+            response,
+            "Belum ada pengalaman yang ditambahkan."
+        )
 
     def test_completed_experience(self):
         self.experience.ended_at = timezone.now()
@@ -55,17 +64,25 @@ class MainTest(TestCase):
 
 
 class AwardTest(TestCase):
+    API_URL = "/api/awards/"
+
     def setUp(self):
         self.award = Award.objects.create(
             section="competition",
             badge_text="TOP 3",
             location="DKI Jakarta",
             title="3rd Place, JakBee Business Plan",
-            description="Regional business competition focused on practical innovation."
+            description=(
+                "Regional business competition focused "
+                "on practical innovation."
+            ),
         )
 
     def test_award_model(self):
-        self.assertEqual(str(self.award), "3rd Place, JakBee Business Plan")
+        self.assertEqual(
+            str(self.award),
+            "3rd Place, JakBee Business Plan"
+        )
         self.assertEqual(self.award.section, "competition")
         self.assertEqual(self.award.badge_text, "TOP 3")
 
@@ -74,19 +91,71 @@ class AwardTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "awards.html")
-        self.assertContains(response, f'href="{reverse("main:show_main")}"')
+        self.assertContains(
+            response,
+            f'href="{reverse("main:show_main")}"'
+        )
 
     def test_awards_page_shows_data(self):
+        # Pastikan halaman Awards dapat diakses
         response = self.client.get(reverse("main:show_awards"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.award.title)
-        self.assertContains(response, self.award.description)
-        self.assertContains(response, self.award.badge_text)
+        self.assertTemplateUsed(response, "awards.html")
+
+        # Data Awards dimuat melalui AJAX, bukan HTML awal
+        api_response = self.client.get(self.API_URL)
+
+        self.assertEqual(api_response.status_code, 200)
+
+        award_data = api_response.json()
+
+        self.assertIsInstance(award_data, list)
+
+        # Cari data Award yang dibuat pada setUp
+        award_item = next(
+            (
+                item for item in award_data
+                if str(item["pk"]) == str(self.award.pk)
+            ),
+            None
+        )
+
+        self.assertIsNotNone(award_item)
+
+        fields = award_item["fields"]
+
+        self.assertEqual(fields["title"], self.award.title)
+        self.assertEqual(
+            fields["description"],
+            self.award.description
+        )
+        self.assertEqual(
+            fields["badge_text"],
+            self.award.badge_text
+        )
+        self.assertEqual(
+            fields["section"],
+            self.award.section
+        )
 
     def test_empty_awards_page(self):
+        # Hapus semua data Award
         Award.objects.all().delete()
+
+        # Pastikan halaman tetap dapat diakses
         response = self.client.get(reverse("main:show_awards"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Belum ada data")
+
+        # Pastikan pesan empty state tersedia di HTML
+        self.assertContains(
+            response,
+            "Tidak ada award yang ditemukan."
+        )
+
+        # Pastikan API mengembalikan daftar kosong
+        api_response = self.client.get(self.API_URL)
+
+        self.assertEqual(api_response.status_code, 200)
+        self.assertEqual(api_response.json(), [])

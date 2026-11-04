@@ -295,7 +295,7 @@ def login_user(request):
     context = {
         "name": "Angga Restha",
         "form": form,
-    }
+    }   
     return render(request, "login.html", context)
 
 @login_required(login_url="/login/")
