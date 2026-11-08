@@ -76,17 +76,24 @@ def project_star(request, project_id):
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def award_list(request):
     if request.method in ("GET", "HEAD"):
-        awards = Award.objects.all().order_by("-created_at")
+        awards = Award.objects.prefetch_related("starred_by").order_by("-created_at")
 
         title = request.query_params.get("title", "").strip()
 
         if title:
             awards = awards.filter(title__icontains=title)
 
-        serializer = AwardSerializer(awards, many=True)
+        serializer = AwardSerializer(
+            awards,
+            many=True,
+            context={"request": request}
+        )
         return Response(serializer.data)
 
-    serializer = AwardSerializer(data=request.data)
+    serializer = AwardSerializer(
+            data=request.data,
+            context={"request": request}
+        )
     serializer.is_valid(raise_exception=True)
     serializer.save()
 
@@ -118,5 +125,26 @@ def award_detail(request, award_id):
 
     serializer.is_valid(raise_exception=True)
     serializer.save()
+
+    return Response(serializer.data)
+
+@api_view(["POST"])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def award_star(request, award_id):
+    award = get_object_or_404(
+        Award.objects.prefetch_related("starred_by"),
+        pk=award_id
+    )
+
+    if award.starred_by.filter(pk=request.user.pk).exists():
+        award.starred_by.remove(request.user)
+    else:
+        award.starred_by.add(request.user)
+
+    serializer = AwardSerializer(
+        award,
+        context={"request": request}
+    )
 
     return Response(serializer.data)

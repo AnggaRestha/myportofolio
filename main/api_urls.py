@@ -9,4 +9,5 @@ urlpatterns = [
     path("projects/<uuid:project_id>/star/", api_views.project_star, name="project-star"),
     path("awards/", award_list, name="award-list"),
     path("awards/<uuid:award_id>/", award_detail, name="award-detail"),
+    path("awards/<uuid:award_id>/star/", api_views.award_star, name="award-star")
 ]

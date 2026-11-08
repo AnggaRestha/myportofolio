@@ -80,7 +80,7 @@ def get_awards_json(request):
 
 @require_POST
 def create_award_ajax(request):
-    if not is_editor_or_admin(request.user):
+    if not request.user.is_superuser:
         return JsonResponse(
             {"message": "Anda tidak memiliki izin untuk menambahkan award."},
             status=403,
@@ -119,7 +119,7 @@ def toggle_star_award(request, award_id):
 
 @login_required(login_url="/login/")
 def create_award(request):
-    if not is_editor_or_admin(request.user):
+    if not request.user.is_superuser:
         raise PermissionDenied
     form = AwardForm(request.POST or None)
 
@@ -163,7 +163,7 @@ def update_award(request, award_id):
 
 @login_required(login_url="/login/")
 def delete_award(request, award_id):
-    if not is_editor_or_admin(request.user):
+    if not request.user.is_superuser:
         raise PermissionDenied
     
     award = get_object_or_404(Award, pk=award_id)

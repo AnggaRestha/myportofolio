@@ -44,6 +44,9 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class AwardSerializer(serializers.ModelSerializer):
+    star_count = serializers.SerializerMethodField()
+    is_starred = serializers.SerializerMethodField()
+
     class Meta:
         model = Award
         fields = [
@@ -53,6 +56,8 @@ class AwardSerializer(serializers.ModelSerializer):
             "section",
             "badge_text",
             "location",
+            "star_count",
+            "is_starred",
         ]
         read_only_fields = ["id"]
 
@@ -66,3 +71,17 @@ class AwardSerializer(serializers.ModelSerializer):
 
     def validate_description(self, value):
         return strip_tags(value)
+
+    def get_star_count(self, obj):
+        return obj.starred_by.count()
+
+    def get_is_starred(self, obj):
+        request = self.context.get("request")
+
+        if request is None or not request.user.is_authenticated:
+            return False
+
+        return any(
+            user.pk == request.user.pk
+            for user in obj.starred_by.all()
+        )

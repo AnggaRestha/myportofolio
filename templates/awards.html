@@ -231,8 +231,10 @@
     <div class="container my-4">
         <h1 class="fw-bold mb-4">Awards & Certifications</h1>
 
-        {% if is_editor %}
-        <button type="button" class="button" popovertarget="award-modal">Tambah Award</button>
+        {% if user.is_superuser %}
+        <button type="button" class="button" id="open-create-award">
+            Tambah Award
+        </button>
         {% endif %}
 
         <form id="award-search-form" class="project-search" style="margin: 1rem 0;">
@@ -288,7 +290,10 @@
         </form>
     </div>
 </div>
+</div>
+{% endif %}
 
+{% if user.is_superuser %}
 <div id="award-delete-modal" class="project-delete-modal" popover="auto"
      role="dialog" aria-modal="true" aria-labelledby="award-delete-title">
     <button type="button" class="project-delete-modal__backdrop"
@@ -303,26 +308,29 @@
         <div class="project-delete-modal__actions">
             <button type="button" class="button button-secondary"
                     popovertarget="award-delete-modal" popovertargetaction="hide">Batal</button>
-            <form id="award-delete-form" method="post" action="">
-                {% csrf_token %}
-                <input type="password" name="secret_code" placeholder="Kode rahasia"
-                       required class="project-search__input">
-                <button type="submit" class="button button-danger">Ya, Hapus</button>
-            </form>
+                <button
+                    type="button"
+                    id="award-confirm-delete"
+                    class="button button-danger">
+                    Ya, Hapus
+                </button>
         </div>
     </div>
 </div>
 {% endif %}
 
+
+{% csrf_token %}
 <script>
-    const AWARDS_ENDPOINT = "{% url 'main:get_awards_json' %}";
-    const IS_EDITOR = '{{ is_editor|yesno:"true,false" }}' === 'true';
-    const CSRF_TOKEN = "{{ csrf_token }}";
-    const CREATE_AWARD_ENDPOINT = "{% url 'main:create_award_ajax' %}";
-    const TOGGLE_STAR_AWARD_URL = "{% url 'main:toggle_star_award' '00000000-0000-0000-0000-000000000000' %}";
-    const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
-    const EDIT_URL = "{% url 'main:update_award' '00000000-0000-0000-0000-000000000000' %}";
-    const DELETE_URL = "{% url 'main:delete_award' '00000000-0000-0000-0000-000000000000' %}";
+    const AWARDS_ENDPOINT = "{% url 'api:award-list' %}";
+    const AWARD_DETAIL_PATTERN = "{% url 'api:award-detail' '00000000-0000-0000-0000-000000000000' %}";
+    const AWARD_STAR_PATTERN = "{% url 'api:award-star' '00000000-0000-0000-0000-000000000000' %}";
+    const LOGIN_URL = "{% url 'main:login' %}";
+    const ZERO_UUID = '00000000-0000-0000-0000-000000000000';
+
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === 'true';
+    const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === 'true';
+    const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === 'true';
 
     const loadingState = document.getElementById('loading');
     const errorState = document.getElementById('error');
@@ -330,45 +338,99 @@
     const contentContainer = document.getElementById('content');
     const competitionGrid = document.getElementById('competition-grid');
     const certificationGrid = document.getElementById('certification-grid');
+    const searchForm = document.getElementById('award-search-form');
+    const searchInput = document.getElementById('search-input');
+    const awardForm = document.getElementById('award-form');
+    const awardModal = document.getElementById('award-modal');
+    const awardFormError = document.getElementById('award-form-error');
+    const awardDeleteModal = document.getElementById('award-delete-modal');
+    const awardConfirmDelete = document.getElementById('award-confirm-delete');
+
+    let awardsAbortController;
+    let searchDebounceTimer;
+    let editingAwardId = null;
+    let pendingDeleteAwardId = null;
+    let awardsById = new Map();
+
+    function getCookie(name) {
+        const prefix = `${name}=`;
+        const cookie = document.cookie.split(';')
+            .map(value => value.trim())
+            .find(value => value.startsWith(prefix));
+
+        return cookie
+            ? decodeURIComponent(cookie.slice(prefix.length))
+            : null;
+    }
 
     function escapeHtml(value) {
         return String(value ?? '')
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
     }
 
-    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showContent = false }) {
+    function awardEndpoint(pattern, id) {
+        return pattern.replace(ZERO_UUID, id);
+    }
+
+    function displayPageSection({
+        showLoading = false,
+        showError = false,
+        showEmpty = false,
+        showContent = false
+    }) {
         loadingState.classList.toggle('hide', !showLoading);
         errorState.classList.toggle('hide', !showError);
         emptyState.classList.toggle('hide', !showEmpty);
         contentContainer.classList.toggle('hide', !showContent);
     }
 
-    function buildEditorActions(pk, title) {
+    function editorActions(award) {
         if (!IS_EDITOR) return '';
-        return `
-            <a href="${EDIT_URL.replace(ZERO_UUID, pk)}" class="button button-secondary">Edit</a>
-            <button type="button" class="button button-danger js-delete-award"
-                    popovertarget="award-delete-modal"
-                    data-pk="${escapeHtml(pk)}" data-title="${escapeHtml(title)}">Hapus</button>`;
+
+        const edit = `
+            <button type="button" class="button button-secondary"
+                data-action="edit"
+                data-id="${escapeHtml(award.id)}">
+                Edit
+            </button>`;
+
+        const remove = IS_SUPERUSER
+            ? `<button type="button" class="button button-danger"
+                data-action="delete"
+                data-id="${escapeHtml(award.id)}">
+                Hapus
+               </button>`
+            : '';
+
+        return edit + remove;
     }
 
-    function buildStarInfo(award, pk) {
-    const starText = award.is_starred ? '★ Star' : '☆ Star';
-    return `
-        <button type="button" 
-                class="button js-star-btn" 
-                id="star-btn-${escapeHtml(pk)}"
-                data-pk="${escapeHtml(pk)}"
-                style="background-color: #f97316; color: #ffffff; border: 1px solid var(--ink); font-weight: 700; cursor: pointer;">
-            ${starText} ${escapeHtml(award.star_count)}
-        </button>`;
-}
+    function starButton(award) {
+        const label = award.is_starred ? '★ Star' : '☆ Star';
+        const count = Number(award.star_count) || 0;
 
-    function buildCompetitionCard(item) {
-        const award = item.fields;
+        if (!IS_AUTHENTICATED) {
+            return `<a href="${LOGIN_URL}" class="button">
+                ☆ Star (${count})
+            </a>`;
+        }
+
+        return `
+            <button type="button" class="button js-star-btn"
+                data-action="star"
+                data-id="${escapeHtml(award.id)}">
+                ${label} (${count})
+            </button>`;
+    }
+
+    function buildCompetitionCard(award) {
         const el = document.createElement('article');
         el.className = 'comp-card';
+
         el.innerHTML = `
             <div class="card-header-row">
                 <span class="badge-pill">${escapeHtml(award.badge_text)}</span>
@@ -377,16 +439,17 @@
             <h3>${escapeHtml(award.title)}</h3>
             <p>${escapeHtml(award.description)}</p>
             <div class="card-actions">
-                ${buildStarInfo(award, item.pk)}
-                ${buildEditorActions(item.pk, award.title)}
+                ${starButton(award)}
+                ${editorActions(award)}
             </div>`;
+
         return el;
     }
 
-    function buildCertificationCard(item) {
-        const award = item.fields;
+    function buildCertificationCard(award) {
         const el = document.createElement('article');
         el.className = 'cert-card';
+
         el.innerHTML = `
             <div class="card-header-row">
                 <span class="cert-category">${escapeHtml(award.badge_text)}</span>
@@ -395,168 +458,318 @@
             <h3>${escapeHtml(award.title)}</h3>
             <p>${escapeHtml(award.description)}</p>
             <div class="card-actions">
-                ${buildStarInfo(award, item.pk)}
-                ${buildEditorActions(item.pk, award.title)}
+                ${starButton(award)}
+                ${editorActions(award)}
             </div>`;
+
         return el;
     }
 
-    async function fetchAwards(searchQuery = '') {
+    async function fetchAwards(query = '') {
+        if (awardsAbortController) {
+            awardsAbortController.abort();
+        }
+
+        const controller = new AbortController();
+        awardsAbortController = controller;
+
         try {
             displayPageSection({ showLoading: true });
 
-            const url = searchQuery
-                ? `${AWARDS_ENDPOINT}?title=${encodeURIComponent(searchQuery)}`
-                : AWARDS_ENDPOINT;
-
-            const response = await fetch(url, {
-                headers: { 'Accept': 'application/json' },
-            });
-            if (!response.ok) throw new Error('Failed to fetch data');
-
-            const awardData = await response.json();
-
-            if (awardData.length === 0) {
-                displayPageSection({ showEmpty: true });
-                return;
+            const url = new URL(AWARDS_ENDPOINT, window.location.origin);
+            if (query) {
+                url.searchParams.set('title', query);
             }
 
-            competitionGrid.innerHTML = '';
-            certificationGrid.innerHTML = '';
-
-            awardData.forEach(item => {
-                if (item.fields.section === 'competition') {
-                    competitionGrid.appendChild(buildCompetitionCard(item));
-                } else if (item.fields.section === 'certification') {
-                    certificationGrid.appendChild(buildCertificationCard(item));
-                }
+            const response = await fetch(url, {
+                headers: { Accept: 'application/json' },
+                signal: controller.signal
             });
 
-            displayPageSection({ showContent: true });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (!Array.isArray(data)) {
+                throw new Error('Format respons Awards tidak sesuai');
+            }
+
+            awardsById = new Map(
+                data.map(item => [item.id, item])
+            );
+
+            competitionGrid.replaceChildren(
+                ...data
+                    .filter(item => item.section === 'competition')
+                    .map(buildCompetitionCard)
+            );
+
+            certificationGrid.replaceChildren(
+                ...data
+                    .filter(item => item.section === 'certification')
+                    .map(buildCertificationCard)
+            );
+
+            displayPageSection({
+                showContent: data.length > 0,
+                showEmpty: data.length === 0
+            });
+
         } catch (error) {
-            console.error('Error loading awards:', error);
+            if (error.name === 'AbortError') return;
+
+            console.error('Gagal memuat Awards:', error);
             displayPageSection({ showError: true });
         }
     }
 
-    const SEARCH_DEBOUNCE_DELAY = 1000;
-    let searchDebounceTimer;
+    function apiErrorMessage(data, status) {
+        const messages = Object.values(data || {})
+            .flatMap(value => Array.isArray(value) ? value : [value])
+            .filter(value => typeof value === 'string');
 
-    const searchForm = document.getElementById('award-search-form');
-    const searchInput = document.getElementById('search-input');
+        return messages.join(' ') ||
+            `Permintaan gagal (HTTP ${status}).`;
+    }
 
-    searchInput.addEventListener('input', function () {
+    async function writeAward(url, method, payload) {
+        const response = await fetch(url, {
+            method,
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken') || ''
+            },
+            body: payload === undefined
+                ? undefined
+                : JSON.stringify(payload)
+        });
+
+        if (response.status === 204) return null;
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(apiErrorMessage(data, response.status));
+        }
+
+        return data;
+    }
+
+    function openEditAward(award) {
+        if (!awardForm || !awardModal) return;
+
+        editingAwardId = award.id;
+        awardForm.reset();
+        awardFormError.textContent = '';
+        awardFormError.classList.add('hide');
+
+        for (const name of [
+            'title', 'description', 'section',
+            'badge_text', 'location'
+        ]) {
+            const field = awardForm.elements.namedItem(name);
+
+            if (field) {
+                field.value = award[name] ?? '';
+            }
+        }
+
+        document.getElementById('award-modal-title').textContent =
+            'Edit Award';
+
+        awardModal.showPopover();
+    }
+
+    const createButton = document.getElementById('open-create-award');
+
+    if (createButton && awardForm && awardModal) {
+        createButton.addEventListener('click', () => {
+            editingAwardId = null;
+            awardForm.reset();
+
+            awardFormError.textContent = '';
+            awardFormError.classList.add('hide');
+
+            document.getElementById('award-modal-title').textContent =
+                'Tambah Award';
+
+            awardModal.showPopover();
+        });
+    }
+
+    if (awardForm) {
+        awardForm.addEventListener('submit', async event => {
+            event.preventDefault();
+
+            const button = awardForm.querySelector(
+                'button[type="submit"]'
+            );
+            button.disabled = true;
+            awardFormError.classList.add('hide');
+
+            try {
+                const formData = new FormData(awardForm);
+
+                const payload = Object.fromEntries(
+                    [
+                        'title', 'description', 'section',
+                        'badge_text', 'location'
+                    ].map(name => [name, formData.get(name) ?? ''])
+                );
+
+                const updating = editingAwardId !== null;
+
+                await writeAward(
+                    updating
+                        ? awardEndpoint(AWARD_DETAIL_PATTERN, editingAwardId)
+                        : AWARDS_ENDPOINT,
+                    updating ? 'PATCH' : 'POST',
+                    payload
+                );
+
+                awardForm.reset();
+                awardModal.hidePopover();
+
+                showToast(
+                    'Berhasil',
+                    updating
+                        ? 'Award berhasil diperbarui.'
+                        : 'Award berhasil ditambahkan.',
+                    'success'
+                );
+
+                await fetchAwards(searchInput.value.trim());
+
+            } catch (error) {
+                awardFormError.textContent = error.message;
+                awardFormError.classList.remove('hide');
+
+                showToast(
+                    'Gagal menyimpan Award',
+                    error.message,
+                    'error'
+                );
+
+            } finally {
+                button.disabled = false;
+            }
+        });
+    }
+
+    async function onCardAction(event) {
+        const button = event.target.closest('button[data-action]');
+
+        if (!button || button.disabled) return;
+
+        const id = button.dataset.id;
+        const award = awardsById.get(id);
+
+        if (!award) return;
+
+        const action = button.dataset.action;
+
+        if (action === 'edit') {
+            openEditAward(award);
+            return;
+        }
+
+        if (action === 'delete') {
+            pendingDeleteAwardId = id;
+
+            document.getElementById('award-delete-name').textContent =
+                award.title;
+
+            awardDeleteModal.showPopover();
+            return;
+        }
+
+        if (action !== 'star') return;
+
+        button.disabled = true;
+
+        try {
+            await writeAward(
+                awardEndpoint(AWARD_STAR_PATTERN, id),
+                'POST'
+            );
+
+            await fetchAwards(searchInput.value.trim());
+
+            showToast(
+                'Berhasil',
+                'Star Award berhasil diperbarui.',
+                'success'
+            );
+
+        } catch (error) {
+            showToast(
+                'Gagal mengubah Star',
+                error.message,
+                'error'
+            );
+            button.disabled = false;
+        }
+    }
+
+    competitionGrid.addEventListener('click', onCardAction);
+    certificationGrid.addEventListener('click', onCardAction);
+
+    if (awardConfirmDelete) {
+        awardConfirmDelete.addEventListener('click', async () => {
+            if (!pendingDeleteAwardId) return;
+
+            awardConfirmDelete.disabled = true;
+
+            try {
+                await writeAward(
+                    awardEndpoint(
+                        AWARD_DETAIL_PATTERN,
+                        pendingDeleteAwardId
+                    ),
+                    'DELETE'
+                );
+
+                awardDeleteModal.hidePopover();
+                pendingDeleteAwardId = null;
+
+                showToast(
+                    'Berhasil',
+                    'Award berhasil dihapus.',
+                    'success'
+                );
+
+                await fetchAwards(searchInput.value.trim());
+
+            } catch (error) {
+                showToast(
+                    'Gagal menghapus Award',
+                    error.message,
+                    'error'
+                );
+
+            } finally {
+                awardConfirmDelete.disabled = false;
+            }
+        });
+    }
+
+    searchInput.addEventListener('input', () => {
         clearTimeout(searchDebounceTimer);
-        searchDebounceTimer = setTimeout(function () {
+
+        searchDebounceTimer = setTimeout(() => {
             fetchAwards(searchInput.value.trim());
-        }, SEARCH_DEBOUNCE_DELAY);
+        }, 300);
     });
 
-    searchForm.addEventListener('submit', function (event) {
+    searchForm.addEventListener('submit', event => {
         event.preventDefault();
         clearTimeout(searchDebounceTimer);
         fetchAwards(searchInput.value.trim());
     });
 
-    const awardForm = document.getElementById('award-form');
-    const awardModal = document.getElementById('award-modal');
-    const awardFormError = document.getElementById('award-form-error');
-
-    async function addAward(event) {
-        event.preventDefault();
-
-        const submitButton = awardForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        awardFormError.classList.add('hide');
-
-        try {
-            const response = await fetch(CREATE_AWARD_ENDPOINT, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': CSRF_TOKEN, 'Accept': 'application/json' },
-                body: new FormData(awardForm),
-            });
-            const result = await response.json().catch(() => ({}));
-
-            if (response.status === 201) {
-                awardForm.reset();
-                awardModal.hidePopover();
-                fetchAwards(searchInput.value.trim());
-                
-                if (typeof showToast === 'function') {
-                    showToast('Berhasil!', 'Award berhasil ditambahkan.', 'success');
-                }
-            } else {
-                const messages = result.errors
-                    ? Object.values(result.errors).flat().map(e => e.message)
-                    : [result.message || `Terjadi kesalahan (status ${response.status}).`];
-                
-                const errText = messages.join(' ');
-                awardFormError.textContent = errText;
-                awardFormError.classList.remove('hide');
-
-                if (typeof showToast === 'function') {
-                    showToast('Gagal!', errText, 'error');
-                }
-            }
-        } catch (error) {
-            console.error('Error adding award:', error);
-            const connErr = 'Tidak dapat terhubung ke server.';
-            awardFormError.textContent = connErr;
-            awardFormError.classList.remove('hide');
-            
-            if (typeof showToast === 'function') {
-                showToast('Error!', connErr, 'error');
-            }
-        } finally {
-            submitButton.disabled = false;
-        }
-    }
-
-    if (awardForm) {
-        awardForm.addEventListener('submit', addAward);
-    }
-
-    const awardDeleteForm = document.getElementById('award-delete-form');
-    const awardDeleteName = document.getElementById('award-delete-name');
-
-    document.addEventListener('click', async function (event) {
-    const starBtn = event.target.closest('.js-star-btn');
-    if (!starBtn) return;
-
-    event.preventDefault();
-    const pk = starBtn.dataset.pk;
-    const url = TOGGLE_STAR_AWARD_URL.replace(ZERO_UUID, pk);
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': CSRF_TOKEN,
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            
-            
-            const starText = data.is_starred ? '★ Star' : '☆ Star';
-            starBtn.innerHTML = `${starText} ${data.star_count}`;
-
-            
-            if (typeof showToast === 'function') {
-                const msg = data.is_starred ? 'Berhasil memberi star!' : 'Batal memberi star.';
-                showToast('Star Updated', msg, 'success');
-            }
-        } else if (response.status === 403) {
-            window.location.href = "{% url 'main:login' %}";
-        }
-    } catch (err) {
-        console.error('Error toggling star:', err);
-        }
-    }); 
-
-    fetchAwards();
+    fetchAwards(searchInput.value.trim());
 </script>
 {% endblock content %}
