@@ -70,7 +70,18 @@ class AwardSerializer(serializers.ModelSerializer):
         return value
 
     def validate_description(self, value):
-        return strip_tags(value)
+        value = strip_tags(value).strip()
+        if not value:
+            raise serializers.ValidationError(
+                "Description cannot be empty."
+            )
+        return value
+
+    def validate_badge_text(self, value):
+        return strip_tags(value).strip()
+
+    def validate_location(self, value):
+        return strip_tags(value).strip()
 
     def get_star_count(self, obj):
         return obj.starred_by.count()

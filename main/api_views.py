@@ -110,7 +110,10 @@ def award_detail(request, award_id):
     award = get_object_or_404(Award, pk=award_id)
 
     if request.method in ("GET", "HEAD"):
-        serializer = AwardSerializer(award)
+        serializer = AwardSerializer(
+            award,
+            context={"request": request}
+        )
         return Response(serializer.data)
 
     if request.method == "DELETE":
@@ -120,7 +123,8 @@ def award_detail(request, award_id):
     serializer = AwardSerializer(
         award,
         data=request.data,
-        partial=request.method == "PATCH"
+        partial=request.method == "PATCH",
+        context={"request": request}
     )
 
     serializer.is_valid(raise_exception=True)

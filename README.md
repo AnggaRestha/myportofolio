@@ -80,3 +80,39 @@ Tugas 5 :
     Data yang ditampilkan melalui AJAX/JavaScript lebih rentan terhadap serangan XSS daripada data yang ditampilkan langsung melalui template Django karena:
         - Pembersihan Otomatis pada Template Django
         - Rendering Manual di JavaScript
+
+
+    
+Tugas 6 :
+
+1. **Jelaskan apa yang dimaksud dengan REST dan mengapa mengembalikan JSON saja belum cukup untuk menyebut sebuah API sebagai RESTful. Jelaskan pula perbedaan PUT dan PATCH beserta contoh kapan masing-masing sebaiknya digunakan!**
+
+    REST (Representational State Transfer) merupakan pendekatan arsitektur untuk membangun layanan web yang memungkinkan komunikasi antara client dan server melalui resource yang diidentifikasi menggunakan URL. Sebuah API tidak otomatis disebut RESTful hanya karena menghasilkan JSON, sebab REST juga memiliki prinsip seperti komunikasi stateless, penggunaan metode HTTP sesuai fungsinya, dan antarmuka yang konsisten.
+
+    PUT digunakan untuk mengganti representasi data suatu resource secara menyeluruh, sedangkan PATCH digunakan untuk memperbarui sebagian data saja. Sebagai contoh, pada API Awards, PUT dapat digunakan ketika seluruh informasi award ingin diperbarui, sementara PATCH lebih sesuai jika hanya ingin mengubah judul award tanpa memengaruhi field lainnya.
+
+
+2. **Jelaskan peran serializer pada Django REST Framework. Apa keuntungannya dibandingkan merakit dictionary secara manual dengan JsonResponse seperti pada Tutorial 05?**
+
+    Serializer pada Django REST Framework berfungsi untuk mengubah objek model Django menjadi data yang dapat dikirim melalui API, sekaligus memvalidasi dan mengolah data yang diterima sebelum disimpan ke database.
+
+    Dibandingkan membuat dictionary secara manual menggunakan JsonResponse, serializer membuat kode lebih terstruktur dan mudah dipelihara. Serializer juga menyediakan validasi field, pengaturan field read-only, serta integrasi langsung dengan model melalui ModelSerializer.
+
+    Pada proyek saya, AwardSerializer digunakan untuk menentukan field yang ditampilkan, membersihkan input menggunakan strip_tags, dan menghasilkan informasi tambahan seperti star_count dan is_starred tanpa mengizinkan pengguna mengubahnya secara langsung.
+
+3. **Jelaskan perbedaan autentikasi dan autorisasi pada Django REST Framework. Mengapa hak akses harus diperiksa dengan permission class di server, bukan hanya dengan menyembunyikan tombol di template?**
+
+   Autentikasi merupakan proses untuk memastikan identitas pengguna, misalnya melalui login menggunakan username dan password. Sementara itu, autorisasi merupakan proses untuk menentukan tindakan yang boleh dilakukan pengguna setelah identitasnya diketahui.
+
+   Pada proyek saya, autentikasi menggunakan SessionAuthentication, sedangkan autorisasi diterapkan melalui permission class. Pengunjung hanya dapat membaca data, pengguna biasa dapat memberikan star, Editor dapat memperbarui data, dan superuser memiliki akses penuh untuk mengelola data.
+
+   Pemeriksaan permission harus dilakukan di server karena menyembunyikan tombol pada template hanya memengaruhi tampilan. Pengguna masih dapat mengirim request secara langsung melalui API. Dengan permission class, server tetap dapat menolak tindakan yang tidak sesuai dengan hak akses pengguna.
+
+4. **Jelaskan mengapa permintaan yang mengubah data tetap memerlukan token CSRF ketika API memakai SessionAuthentication. Mengapa test yang memakai force_authenticate tidak cukup untuk membuktikan bahwa perlindungan CSRF berjalan?**
+
+   Token CSRF diperlukan untuk melindungi pengguna dari serangan Cross-Site Request Forgery, yaitu kondisi ketika situs lain mencoba mengirim permintaan yang mengubah data menggunakan sesi login pengguna tanpa persetujuannya. Pada SessionAuthentication, browser menggunakan cookie sesi untuk mengenali pengguna sehingga request yang mengubah data, seperti POST, PUT, PATCH, dan DELETE, perlu dilindungi dengan pemeriksaan CSRF.
+
+   Pengujian menggunakan force_authenticate tidak cukup untuk membuktikan perlindungan tersebut karena metode ini mengatur autentikasi pengguna secara langsung dan melewati proses autentikasi sesi yang normal, termasuk pemeriksaan CSRF.
+
+   Oleh karena itu, pengujian perlu menggunakan APIClient dengan enforce_csrf_checks=True dan login() untuk membuat sesi autentikasi. Pengujian dilakukan dengan memastikan request tanpa token CSRF ditolak, sedangkan request menggunakan token CSRF yang valid dapat diproses sesuai permission pengguna.
+

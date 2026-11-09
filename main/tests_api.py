@@ -146,7 +146,7 @@ class ProjectAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
-class AwardEditorPermissionTest(TestCase):
+class AwardEditorPermissionTest(APITestCase):
     def setUp(self):
         self.client = APIClient()
 
@@ -245,6 +245,7 @@ class AwardEditorPermissionTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 403)
+        self.assertEqual(Award.objects.count(), 1)
 
     def test_editor_cannot_delete(self):
         self.client.force_authenticate(
@@ -279,3 +280,246 @@ class AwardEditorPermissionTest(TestCase):
                 pk=self.award.pk
             ).exists()
         )
+
+    
+    def test_guest_and_regular_user_cannot_write(self):
+        payload = {
+            "title": "Award Baru",
+            "description": "Deskripsi award",
+            "section": "competition",
+            "badge_text": "TOP 1",
+            "location": "Jakarta",
+        }
+
+        for user in (None, self.user_biasa):
+            self.client.force_authenticate(user=user)
+
+            # Pengunjung dan user biasa tetap bisa membaca
+            self.assertEqual(
+                self.client.get(self.list_url).status_code, 200
+            )
+
+            # Tidak boleh membuat
+            response = self.client.post(
+                self.list_url, payload, format="json"
+            )
+            self.assertEqual(response.status_code, 403)
+
+            # Tidak boleh mengubah
+            response = self.client.patch(
+                self.detail_url,
+                {"title": "Judul Berubah"},
+                format="json"
+            )
+            self.assertEqual(response.status_code, 403)
+
+            # Tidak boleh menghapus
+            response = self.client.delete(self.detail_url)
+            self.assertEqual(response.status_code, 403)
+
+            # Database harus tetap sama
+            self.assertEqual(Award.objects.count(), 1)
+            self.award.refresh_from_db()
+            self.assertEqual(
+                self.award.title, "Award Percobaan"
+            )
+
+    def test_superuser_can_create(self):
+        self.client.force_authenticate(user=self.superuser)
+
+        response = self.client.post(
+            self.list_url,
+            {
+                "title": "Award Superuser",
+                "description": "Dibuat melalui API",
+                "section": "competition",
+                "badge_text": "Juara 1",
+                "location": "Jakarta",
+            },
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Award.objects.count(), 2)
+        self.assertTrue(
+            Award.objects.filter(
+                title="Award Superuser"
+            ).exists()
+        )
+
+    def test_editor_can_put(self):
+        self.client.force_authenticate(user=self.editor)
+
+        response = self.client.put(
+            self.detail_url,
+            {
+                "title": "Award Updated",
+                "description": "Diperbarui oleh Editor",
+                "section": "certification",
+                "badge_text": "Certified",
+                "location": "Depok",
+            },
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.award.refresh_from_db()
+        self.assertEqual(self.award.title, "Award Updated")
+        self.assertEqual(
+            self.award.section, "certification"
+        )
+
+    def test_invalid_award_data_rejected(self):
+        self.client.force_authenticate(user=self.superuser)
+
+        payload = {
+            "title": "Award Valid",
+            "description": "Deskripsi valid",
+            "section": "competition",
+        }
+
+        invalid_inputs = [
+            {"title": "   "},
+            {"title": "<b> </b>"},
+            {"section": "invalid-section"},
+        ]
+
+        for invalid in invalid_inputs:
+            response = self.client.post(
+                self.list_url,
+                {**payload, **invalid},
+                format="json"
+            )
+
+            self.assertEqual(response.status_code, 400)
+
+        # Semua permintaan invalid tidak membuat data
+        self.assertEqual(Award.objects.count(), 1)
+
+    def test_html_cleaning_and_readonly_fields(self):
+        self.client.force_authenticate(user=self.superuser)
+
+        response = self.client.post(
+            self.list_url,
+            {
+                "title": "<b>Juara Nasional</b>",
+                "description": "<i>Kompetisi Teknologi</i>",
+                "section": "competition",
+                "badge_text": "TOP 3",
+                "location": "Jakarta",
+                "star_count": 999,
+                "is_starred": True,
+            },
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response.data["title"], "Juara Nasional"
+        )
+        self.assertEqual(
+            response.data["description"],
+            "Kompetisi Teknologi"
+        )
+
+        # Field perhitungan tidak boleh dimanipulasi
+        self.assertEqual(response.data["star_count"], 0)
+        self.assertFalse(response.data["is_starred"])
+
+    def test_star_requires_login_and_toggles(self):
+        star_url = reverse(
+            "api:award-star",
+            kwargs={"award_id": self.award.id}
+        )
+
+        # Pengunjung tanpa login ditolak
+        response = self.client.post(star_url)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(
+            self.award.starred_by.count(), 0
+        )
+
+        # Pengguna biasa boleh memberi Star
+        self.client.force_authenticate(user=self.user_biasa)
+
+        response = self.client.post(star_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["is_starred"])
+        self.assertEqual(response.data["star_count"], 1)
+
+        self.assertTrue(
+            self.award.starred_by.filter(
+                pk=self.user_biasa.pk
+            ).exists()
+        )
+
+        # Klik lagi untuk Unstar
+        response = self.client.post(star_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.data["is_starred"])
+        self.assertEqual(response.data["star_count"], 0)
+        self.assertEqual(
+            self.award.starred_by.count(), 0
+        )
+
+    def test_csrf_session_requires_token(self):
+        client = APIClient(enforce_csrf_checks=True)
+
+        # Login memakai session sungguhan
+        login_success = client.login(
+            username="test_owner",
+            password="testpass123"
+        )
+        self.assertTrue(login_success)
+
+        payload = {
+            "title": "CSRF Test Award",
+            "description": "Testing CSRF",
+            "section": "competition",
+            "badge_text": "TEST",
+            "location": "Jakarta",
+        }
+
+        # Ambil halaman HTML untuk membuat CSRF cookie
+        page = client.get(
+            self.list_url,
+            HTTP_ACCEPT="text/html"
+        )
+        self.assertEqual(page.status_code, 200)
+
+        token = client.cookies["csrftoken"].value
+
+        # POST tanpa header CSRF harus ditolak
+        response = client.post(
+            self.list_url,
+            payload,
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(Award.objects.count(), 1)
+
+        # POST dengan token CSRF harus berhasil
+        response = client.post(
+            self.list_url,
+            payload,
+            format="json",
+            HTTP_X_CSRFTOKEN=token
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Award.objects.count(), 2)
+
+    def test_missing_award_returns_404(self):
+        import uuid
+
+        missing_url = reverse(
+            "api:award-detail",
+            kwargs={"award_id": uuid.uuid4()}
+        )
+
+        response = self.client.get(missing_url)
+
+        self.assertEqual(response.status_code, 404)
