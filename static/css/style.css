@@ -804,4 +804,61 @@ h1, .brand, .section-title, .project-card h3, .group-title, .award-box h3, .cert
         background: rgba(255, 255, 255, 0.25);
         font-size: 0.8rem;
     }
+
+    /* Sembunyikan elemen state AJAX */
+    .hide {
+        display: none !important;
+    }
+
+    /* Toast Component */
+    .toast-component {
+        position: fixed !important;
+        bottom: 2rem !important;
+        right: 2rem !important;
+        top: auto !important;
+        left: auto !important;
+        z-index: 99999 !important;
+        margin: 0;
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius);
+        box-shadow: 4px 4px 0px #000000;
+        background-color: var(--paper);
+        border: 2px solid var(--line);
+        color: inherit;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .toast-hidden {
+        opacity: 0 !important;
+        transform: translateY(150%) !important;
+        pointer-events: none !important;
+        display: none !important; /* Mencegah toast menutupi header saat tersembunyi */
+    }
+
+    .toast-show {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+        pointer-events: auto !important;
+        display: flex !important;
+    }
+
+    .toast-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.15rem;
+        font-family: "Space Grotesk", -apple-system, sans-serif;
+    }
+
+    .toast-message {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    /* Modifikasi border kiri berdasarkan tipe notifikasi */
+    .toast-success { border-left: 6px solid #22c55e !important; }
+    .toast-error { border-left: 6px solid #b42318 !important; }
+    .toast-normal { border-left: 6px solid var(--accent) !important; }
 }

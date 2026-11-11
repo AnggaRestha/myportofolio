@@ -134,6 +134,95 @@
         color: var(--text-muted);
         margin: 0;
     }
+
+    .hide {
+        display: none !important;
+    }
+
+    .project-search__input {
+        color: #111111;
+        background-color: #ffffff;
+        caret-color: #111111;
+    }
+
+    .project-search__input::placeholder {
+        color: #6b6b6b;
+    }
+
+    .card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .card-actions form {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin: 0;
+    }
+
+    .card-actions .project-search__input {
+        width: 9rem;
+        flex: 0 0 auto;
+    }
+
+    .project-delete-modal {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        width: 90% !important;
+        max-width: 500px !important;
+    }
+
+    .project-delete-modal__content {
+        background-color: var(--surface, #1e1e1e) !important;
+        border: 2px solid var(--ink, #ffffff) !important;
+        padding: 1.5rem !important;
+        border-radius: 8px !important;
+        box-shadow: 6px 6px 0px #000000 !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+        color: var(--ink, #ffffff) !important;
+        box-sizing: border-box !important;
+    }
+
+    #award-form .form-group {
+        margin-bottom: 1rem;
+    }
+
+    #award-form .form-group label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 700;
+    }
+
+    #award-form .form-group input,
+    #award-form .form-group textarea,
+    #award-form .form-group select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.6rem 0.8rem;
+        background-color: #ffffff;
+        color: #111111;
+        border: 1px solid var(--ink, #000000);
+        border-radius: 4px;
+        font: inherit;
+    }
+
+    #award-form-error {
+        color: #f87171;
+        font-size: 0.85rem;
+        margin: 0 0 1rem;
+        font-weight: 700;
+    }
 </style>
 {% endblock meta %}
 
@@ -143,67 +232,543 @@
         <h1 class="fw-bold mb-4">Awards & Certifications</h1>
 
         {% if user.is_superuser %}
-        <a href="{% url 'main:create_award' %}" class="button">Tambah Award</a>
+        <button type="button" class="button" id="open-create-award">
+            Tambah Award
+        </button>
         {% endif %}
 
-        <h2 class="section-title">Competition & Events</h2>
-        <div class="awards-grid">
-            {% for item in competitions %}
-                <article class="comp-card">
-                    <div class="card-header-row">
-                        <span class="badge-pill">{{ item.badge_text }}</span>
-                        <span class="location-text">{{ item.location }}</span>
-                    </div>
-                    <h3>{{ item.title }}</h3>
-                    <p>{{ item.description }}</p>
-                    <div class="card-header-row" style="margin-top: 1rem; margin-bottom: 0;">
-                        
-                        {% if user.is_superuser %}
-                        <a href="{% url 'main:update_award' item.id %}" class="button button-secondary">Edit</a>
-                        {% endif %}
+        <form id="award-search-form" class="project-search" style="margin: 1rem 0;">
+            <input type="search"
+                   id="search-input"
+                   name="title"
+                   placeholder="Cari berdasarkan judul"
+                   class="project-search__input"
+                   aria-label="Cari award berdasarkan judul">
+            <button type="submit" class="button">Cari</button>
+        </form>
 
-                        <form method="post" action="{% url 'main:delete_award' item.id %}">
-                            {% csrf_token %}
-                            {% if user.is_superuser %}
-                            <button type="submit" class="button button-danger">Hapus</button>
-                            {% endif %}
+        <div id="loading" class="empty-state hide"><p>Memuat awards...</p></div>
+        <div id="error" class="empty-state hide"><p>Gagal memuat data awards. Silakan coba lagi.</p></div>
+        <div id="empty" class="empty-state hide"><p>Tidak ada award yang ditemukan.</p></div>
 
-                        </form>
-                    </div>
-                </article>
-            {% empty %}
-                <p>Belum ada data kompetisi.</p>
-            {% endfor %}
-        </div>
+        <div id="content" class="hide">
+            <h2 class="section-title">Competition & Events</h2>
+            <div id="competition-grid" class="awards-grid"></div>
 
-        <h2 class="section-title">Professional Certifications</h2>
-        <div class="cert-grid">
-            {% for cert in certifications %}
-                <article class="cert-card">
-                    <div class="card-header-row">
-                        <span class="cert-category">{{ cert.badge_text }}</span>
-                        <span class="green-dot"></span>
-                    </div>
-                    <h3>{{ cert.title }}</h3>
-                    <p>{{ cert.description }}</p>
-                    <div class="card-header-row" style="margin-top: 1rem; margin-bottom: 0;">
-                        
-                        {% if user.is_superuser %}
-                        <a href="{% url 'main:update_award' cert.id %}" class="button button-secondary">Edit</a>
-                        {% endif %}
-
-                        <form method="post" action="{% url 'main:delete_award' cert.id %}">
-                            {% csrf_token %}
-                            {% if user.is_superuser %}
-                            <button type="submit" class="button button-danger">Hapus</button>
-                            {% endif %}
-                        </form>
-                    </div>
-                </article>
-            {% empty %}
-                <p>Belum ada data sertifikasi.</p>
-            {% endfor %}
+            <h2 class="section-title">Professional Certifications</h2>
+            <div id="certification-grid" class="cert-grid"></div>
         </div>
     </div>
 </main>
+
+{% if is_editor %}
+<div id="award-modal" class="project-delete-modal" popover="auto"
+     role="dialog" aria-labelledby="award-modal-title">
+    <button type="button" class="project-delete-modal__backdrop"
+            popovertarget="award-modal" popovertargetaction="hide"
+            aria-label="Tutup form"></button>
+    <div class="project-delete-modal__content">
+        <button type="button" class="project-delete-modal__close"
+                popovertarget="award-modal" popovertargetaction="hide"
+                aria-label="Tutup form">×</button>
+        <h2 id="award-modal-title">Tambah Award</h2>
+
+        <form id="award-form" novalidate>
+            {% csrf_token %}
+            {% for field in award_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <p id="award-form-error" class="hide"></p>
+            <div class="project-delete-modal__actions">
+                <button type="button" class="button button-secondary"
+                        popovertarget="award-modal" popovertargetaction="hide">Batal</button>
+                <button type="submit" class="button">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% if user.is_superuser %}
+<div id="award-delete-modal" class="project-delete-modal" popover="auto"
+     role="dialog" aria-modal="true" aria-labelledby="award-delete-title">
+    <button type="button" class="project-delete-modal__backdrop"
+            popovertarget="award-delete-modal" popovertargetaction="hide"
+            aria-label="Tutup konfirmasi hapus"></button>
+    <div class="project-delete-modal__content">
+        <button type="button" class="project-delete-modal__close"
+                popovertarget="award-delete-modal" popovertargetaction="hide"
+                aria-label="Tutup konfirmasi hapus">×</button>
+        <h2 id="award-delete-title">Hapus Award?</h2>
+        <p>Apakah Anda yakin ingin menghapus <strong id="award-delete-name"></strong>?</p>
+        <div class="project-delete-modal__actions">
+            <button type="button" class="button button-secondary"
+                    popovertarget="award-delete-modal" popovertargetaction="hide">Batal</button>
+                <button
+                    type="button"
+                    id="award-confirm-delete"
+                    class="button button-danger">
+                    Ya, Hapus
+                </button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+{% csrf_token %}
+<script>
+    const AWARDS_ENDPOINT = "{% url 'api:award-list' %}";
+    const AWARD_DETAIL_PATTERN = "{% url 'api:award-detail' '00000000-0000-0000-0000-000000000000' %}";
+    const AWARD_STAR_PATTERN = "{% url 'api:award-star' '00000000-0000-0000-0000-000000000000' %}";
+    const LOGIN_URL = "{% url 'main:login' %}";
+    const ZERO_UUID = '00000000-0000-0000-0000-000000000000';
+
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === 'true';
+    const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === 'true';
+    const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === 'true';
+
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const emptyState = document.getElementById('empty');
+    const contentContainer = document.getElementById('content');
+    const competitionGrid = document.getElementById('competition-grid');
+    const certificationGrid = document.getElementById('certification-grid');
+    const searchForm = document.getElementById('award-search-form');
+    const searchInput = document.getElementById('search-input');
+    const awardForm = document.getElementById('award-form');
+    const awardModal = document.getElementById('award-modal');
+    const awardFormError = document.getElementById('award-form-error');
+    const awardDeleteModal = document.getElementById('award-delete-modal');
+    const awardConfirmDelete = document.getElementById('award-confirm-delete');
+
+    let awardsAbortController;
+    let searchDebounceTimer;
+    let editingAwardId = null;
+    let pendingDeleteAwardId = null;
+    let awardsById = new Map();
+
+    function getCookie(name) {
+        const prefix = `${name}=`;
+        const cookie = document.cookie.split(';')
+            .map(value => value.trim())
+            .find(value => value.startsWith(prefix));
+
+        return cookie
+            ? decodeURIComponent(cookie.slice(prefix.length))
+            : null;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    function awardEndpoint(pattern, id) {
+        return pattern.replace(ZERO_UUID, id);
+    }
+
+    function displayPageSection({
+        showLoading = false,
+        showError = false,
+        showEmpty = false,
+        showContent = false
+    }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        contentContainer.classList.toggle('hide', !showContent);
+    }
+
+    function editorActions(award) {
+        if (!IS_EDITOR) return '';
+
+        const edit = `
+            <button type="button" class="button button-secondary"
+                data-action="edit"
+                data-id="${escapeHtml(award.id)}">
+                Edit
+            </button>`;
+
+        const remove = IS_SUPERUSER
+            ? `<button type="button" class="button button-danger"
+                data-action="delete"
+                data-id="${escapeHtml(award.id)}">
+                Hapus
+               </button>`
+            : '';
+
+        return edit + remove;
+    }
+
+    function starButton(award) {
+        const label = award.is_starred ? '★ Star' : '☆ Star';
+        const count = Number(award.star_count) || 0;
+
+        if (!IS_AUTHENTICATED) {
+            return `<a href="${LOGIN_URL}" class="button">
+                ☆ Star (${count})
+            </a>`;
+        }
+
+        return `
+            <button type="button" class="button js-star-btn"
+                data-action="star"
+                data-id="${escapeHtml(award.id)}">
+                ${label} (${count})
+            </button>`;
+    }
+
+    function buildCompetitionCard(award) {
+        const el = document.createElement('article');
+        el.className = 'comp-card';
+
+        el.innerHTML = `
+            <div class="card-header-row">
+                <span class="badge-pill">${escapeHtml(award.badge_text)}</span>
+                <span class="location-text">${escapeHtml(award.location)}</span>
+            </div>
+            <h3>${escapeHtml(award.title)}</h3>
+            <p>${escapeHtml(award.description)}</p>
+            <div class="card-actions">
+                ${starButton(award)}
+                ${editorActions(award)}
+            </div>`;
+
+        return el;
+    }
+
+    function buildCertificationCard(award) {
+        const el = document.createElement('article');
+        el.className = 'cert-card';
+
+        el.innerHTML = `
+            <div class="card-header-row">
+                <span class="cert-category">${escapeHtml(award.badge_text)}</span>
+                <span class="green-dot"></span>
+            </div>
+            <h3>${escapeHtml(award.title)}</h3>
+            <p>${escapeHtml(award.description)}</p>
+            <div class="card-actions">
+                ${starButton(award)}
+                ${editorActions(award)}
+            </div>`;
+
+        return el;
+    }
+
+    async function fetchAwards(query = '') {
+        if (awardsAbortController) {
+            awardsAbortController.abort();
+        }
+
+        const controller = new AbortController();
+        awardsAbortController = controller;
+
+        try {
+            displayPageSection({ showLoading: true });
+
+            const url = new URL(AWARDS_ENDPOINT, window.location.origin);
+            if (query) {
+                url.searchParams.set('title', query);
+            }
+
+            const response = await fetch(url, {
+                headers: { Accept: 'application/json' },
+                signal: controller.signal
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (!Array.isArray(data)) {
+                throw new Error('Format respons Awards tidak sesuai');
+            }
+
+            awardsById = new Map(
+                data.map(item => [item.id, item])
+            );
+
+            competitionGrid.replaceChildren(
+                ...data
+                    .filter(item => item.section === 'competition')
+                    .map(buildCompetitionCard)
+            );
+
+            certificationGrid.replaceChildren(
+                ...data
+                    .filter(item => item.section === 'certification')
+                    .map(buildCertificationCard)
+            );
+
+            displayPageSection({
+                showContent: data.length > 0,
+                showEmpty: data.length === 0
+            });
+
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+
+            console.error('Gagal memuat Awards:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    function apiErrorMessage(data, status) {
+        const messages = Object.values(data || {})
+            .flatMap(value => Array.isArray(value) ? value : [value])
+            .filter(value => typeof value === 'string');
+
+        return messages.join(' ') ||
+            `Permintaan gagal (HTTP ${status}).`;
+    }
+
+    async function writeAward(url, method, payload) {
+        const response = await fetch(url, {
+            method,
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken') || ''
+            },
+            body: payload === undefined
+                ? undefined
+                : JSON.stringify(payload)
+        });
+
+        if (response.status === 204) return null;
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(apiErrorMessage(data, response.status));
+        }
+
+        return data;
+    }
+
+    function openEditAward(award) {
+        if (!awardForm || !awardModal) return;
+
+        editingAwardId = award.id;
+        awardForm.reset();
+        awardFormError.textContent = '';
+        awardFormError.classList.add('hide');
+
+        for (const name of [
+            'title', 'description', 'section',
+            'badge_text', 'location'
+        ]) {
+            const field = awardForm.elements.namedItem(name);
+
+            if (field) {
+                field.value = award[name] ?? '';
+            }
+        }
+
+        document.getElementById('award-modal-title').textContent =
+            'Edit Award';
+
+        awardModal.showPopover();
+    }
+
+    const createButton = document.getElementById('open-create-award');
+
+    if (createButton && awardForm && awardModal) {
+        createButton.addEventListener('click', () => {
+            editingAwardId = null;
+            awardForm.reset();
+
+            awardFormError.textContent = '';
+            awardFormError.classList.add('hide');
+
+            document.getElementById('award-modal-title').textContent =
+                'Tambah Award';
+
+            awardModal.showPopover();
+        });
+    }
+
+    if (awardForm) {
+        awardForm.addEventListener('submit', async event => {
+            event.preventDefault();
+
+            const button = awardForm.querySelector(
+                'button[type="submit"]'
+            );
+            button.disabled = true;
+            awardFormError.classList.add('hide');
+
+            try {
+                const formData = new FormData(awardForm);
+
+                const payload = Object.fromEntries(
+                    [
+                        'title', 'description', 'section',
+                        'badge_text', 'location'
+                    ].map(name => [name, formData.get(name) ?? ''])
+                );
+
+                const updating = editingAwardId !== null;
+
+                await writeAward(
+                    updating
+                        ? awardEndpoint(AWARD_DETAIL_PATTERN, editingAwardId)
+                        : AWARDS_ENDPOINT,
+                    updating ? 'PATCH' : 'POST',
+                    payload
+                );
+
+                awardForm.reset();
+                awardModal.hidePopover();
+
+                showToast(
+                    'Berhasil',
+                    updating
+                        ? 'Award berhasil diperbarui.'
+                        : 'Award berhasil ditambahkan.',
+                    'success'
+                );
+
+                await fetchAwards(searchInput.value.trim());
+
+            } catch (error) {
+                awardFormError.textContent = error.message;
+                awardFormError.classList.remove('hide');
+
+                showToast(
+                    'Gagal menyimpan Award',
+                    error.message,
+                    'error'
+                );
+
+            } finally {
+                button.disabled = false;
+            }
+        });
+    }
+
+    async function onCardAction(event) {
+        const button = event.target.closest('button[data-action]');
+
+        if (!button || button.disabled) return;
+
+        const id = button.dataset.id;
+        const award = awardsById.get(id);
+
+        if (!award) return;
+
+        const action = button.dataset.action;
+
+        if (action === 'edit') {
+            openEditAward(award);
+            return;
+        }
+
+        if (action === 'delete') {
+            pendingDeleteAwardId = id;
+
+            document.getElementById('award-delete-name').textContent =
+                award.title;
+
+            awardDeleteModal.showPopover();
+            return;
+        }
+
+        if (action !== 'star') return;
+
+        button.disabled = true;
+
+        try {
+            await writeAward(
+                awardEndpoint(AWARD_STAR_PATTERN, id),
+                'POST'
+            );
+
+            await fetchAwards(searchInput.value.trim());
+
+            showToast(
+                'Berhasil',
+                'Star Award berhasil diperbarui.',
+                'success'
+            );
+
+        } catch (error) {
+            showToast(
+                'Gagal mengubah Star',
+                error.message,
+                'error'
+            );
+            button.disabled = false;
+        }
+    }
+
+    competitionGrid.addEventListener('click', onCardAction);
+    certificationGrid.addEventListener('click', onCardAction);
+
+    if (awardConfirmDelete) {
+        awardConfirmDelete.addEventListener('click', async () => {
+            if (!pendingDeleteAwardId) return;
+
+            awardConfirmDelete.disabled = true;
+
+            try {
+                await writeAward(
+                    awardEndpoint(
+                        AWARD_DETAIL_PATTERN,
+                        pendingDeleteAwardId
+                    ),
+                    'DELETE'
+                );
+
+                awardDeleteModal.hidePopover();
+                pendingDeleteAwardId = null;
+
+                showToast(
+                    'Berhasil',
+                    'Award berhasil dihapus.',
+                    'success'
+                );
+
+                await fetchAwards(searchInput.value.trim());
+
+            } catch (error) {
+                showToast(
+                    'Gagal menghapus Award',
+                    error.message,
+                    'error'
+                );
+
+            } finally {
+                awardConfirmDelete.disabled = false;
+            }
+        });
+    }
+
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchDebounceTimer);
+
+        searchDebounceTimer = setTimeout(() => {
+            fetchAwards(searchInput.value.trim());
+        }, 300);
+    });
+
+    searchForm.addEventListener('submit', event => {
+        event.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        fetchAwards(searchInput.value.trim());
+    });
+
+    fetchAwards(searchInput.value.trim());
+</script>
 {% endblock content %}

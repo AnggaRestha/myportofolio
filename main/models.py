@@ -40,6 +40,10 @@ class Award(models.Model):
     location = models.CharField(max_length=100, blank=True, null=True)    # Misal: 'DKI Jakarta'
     created_at = models.DateTimeField(auto_now_add=True)
 
+    starred_by = models.ManyToManyField(
+        User, related_name="starred_awards", blank=True
+    )
+
     def __str__(self):
         return self.title
 

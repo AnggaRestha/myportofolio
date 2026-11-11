@@ -1,19 +1,19 @@
-from django.shortcuts import render
-from main.models import Project
-from main.forms import ProjectForm, AwardForm
-from .models import Award
+from main.models import Project, Experience, Award
+from main.forms import ProjectForm, AwardForm, AwardCreateForm
 from django.contrib import messages
 from django.core import serializers
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import get_object_or_404, redirect, render
 import datetime
-from django.contrib.auth.decorators import login_required  
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required 
 from django.core.exceptions import PermissionDenied        
 
-from main.models import Experience
+def is_editor_or_admin(user):
+    return user.is_authenticated and (user.is_superuser or user.groups.filter(name='Editor').exists())
 
 
 def show_main(request):
@@ -40,29 +40,82 @@ def show_experience(request):
 
 
 def show_awards(request):
-    json_response = get_awards_json(request)
-
-    awards = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    awards = [award.object for award in awards]
-
-    competitions = [a for a in awards if a.section == "competition"]
-    certifications = [a for a in awards if a.section == "certification"]
-
+    is_editor = is_editor_or_admin(request.user)
     context = {
         "name": "Angga Restha",
-        "competitions": competitions,
-        "certifications": certifications,
+        "is_editor": is_editor,
+        "award_form": AwardCreateForm() if is_editor else None,
     }
     return render(request, "awards.html", context)
 
 
 def get_awards_json(request):
-    awards = Award.objects.all()
-    awards_json = serializers.serialize("json", awards)
-    return HttpResponse(awards_json, content_type="application/json")
+    title_query = request.GET.get("title", "").strip()
+
+    awards = Award.objects.prefetch_related("starred_by").order_by("-created_at")
+
+    if title_query:
+        awards = awards.filter(title__icontains=title_query)
+
+    data = []
+    for award in awards:
+        starred_users = list(award.starred_by.all())
+        is_starred = request.user.is_authenticated and request.user in starred_users
+
+        data.append({
+            "pk": str(award.id),
+            "fields": {
+                "title": award.title,
+                "description": award.description,
+                "section": award.section,
+                "badge_text": award.badge_text or "",
+                "location": award.location or "",
+                "star_count": len(starred_users),
+                "is_starred": is_starred,
+            },
+        })
+
+    return JsonResponse(data, safe=False)
+
+
+@require_POST
+def create_award_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Anda tidak memiliki izin untuk menambahkan award."},
+            status=403,
+        )
+
+    form = AwardCreateForm(request.POST)
+    if form.is_valid():
+        award = form.save()
+        return JsonResponse(
+            {"message": "Award berhasil ditambahkan.", "pk": str(award.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@login_required(login_url="/login/")
+def toggle_star_award(request, award_id):
+    award = get_object_or_404(Award, pk=award_id)
+
+    if request.method == "POST":
+        if request.user in award.starred_by.all():
+            award.starred_by.remove(request.user)
+            is_starred = False
+        else:
+            award.starred_by.add(request.user)
+            is_starred = True
+
+        return JsonResponse({
+            "is_starred": is_starred,
+            "star_count": award.starred_by.count()
+        })
+
+    return JsonResponse({"message": "Invalid request"}, status=400)
+
 
 @login_required(login_url="/login/")
 def create_award(request):
@@ -85,8 +138,11 @@ def create_award(request):
     }
     return render(request, "award_form.html", context)
 
-
+@login_required(login_url="/login/")
 def update_award(request, award_id):
+    if not is_editor_or_admin(request.user):
+        raise PermissionDenied
+    
     award = get_object_or_404(Award, pk=award_id)
     form = AwardForm(request.POST or None, instance=award)
 
@@ -105,8 +161,11 @@ def update_award(request, award_id):
     }
     return render(request, "award_form.html", context)
 
-
+@login_required(login_url="/login/")
 def delete_award(request, award_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
     award = get_object_or_404(Award, pk=award_id)
 
     if request.method == "POST":
@@ -121,9 +180,10 @@ def delete_award(request, award_id):
 
     return redirect("main:show_awards")
 
+
 @login_required(login_url="/login/")
 def create_project(request):
-    if not request.user.is_superuser:
+    if not is_editor_or_admin(request.user):
         raise PermissionDenied
     
     form = ProjectForm(request.POST or None)
@@ -144,36 +204,50 @@ def create_project(request):
     return render(request, "projects_form.html", context)
 
 def show_projects(request):
-    json_response = get_projects_json(request)
-
-    projects = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    projects = [project.object for project in projects]
     title_query = request.GET.get("title", "").strip()
 
     context = {
         "name": "Angga Restha",
-        "project_list": projects,
         "title_query": title_query,
+        "is_editor": is_editor_or_admin(request.user),
     }
     return render(request, "projects.html", context)
 
 def get_projects_json(request):
     title_query = request.GET.get("title", "").strip()
-    projects = Project.objects.all()
+    projects = Project.objects.prefetch_related('starred_by').all()
 
     if title_query:
         projects = projects.filter(title__icontains=title_query)
 
-    projects_json = serializers.serialize(
-        "json", projects, use_natural_foreign_keys=True
-    )
-    
-    return HttpResponse(projects_json, content_type="application/json")
+    data = []
+    for project in projects:
+        starred_users = project.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ", ".join([u.username for u in starred_users])
 
+        data.append({
+            "pk": str(project.id),
+            "fields": {
+                "title": project.title,
+                "description": project.description,
+                "tech_stack": project.tech_stack,
+                "project_url": project.project_url,
+                "project_image_url": project.project_image_url,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            }
+        })
+    
+    return JsonResponse(data, safe=False)
+
+
+@login_required(login_url="/login/")
 def delete_project(request, project_id):
+    if not is_editor_or_admin(request.user):
+        raise PermissionDenied
+
     project = get_object_or_404(Project, pk=project_id)
 
     if request.method == "POST":
@@ -221,7 +295,7 @@ def login_user(request):
     context = {
         "name": "Angga Restha",
         "form": form,
-    }
+    }   
     return render(request, "login.html", context)
 
 @login_required(login_url="/login/")
@@ -229,11 +303,27 @@ def toggle_star(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
 
     if request.method == "POST":
-        # Kalau akun ini sudah pernah memberi star, batalkan star-nya.
-        # Kalau belum, tambahkan star.
         if request.user in project.starred_by.all():
             project.starred_by.remove(request.user)
         else:
             project.starred_by.add(request.user)
 
     return redirect("main:show_projects")
+
+@require_POST
+def create_project_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Hanya pemilik portofolio yang dapat menambahkan proyek."},
+            status=403,
+        )
+
+    form = ProjectForm(request.POST)
+    if form.is_valid():
+        project = form.save()
+        return JsonResponse(
+            {"message": "Proyek berhasil ditambahkan.", "pk": str(project.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
